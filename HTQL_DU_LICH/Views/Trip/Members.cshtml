@@ -1,0 +1,27 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.TripMemberViewModel>
+
+<h2>Thành viên nhóm</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>Họ tên</th>
+            <th>Giới thiệu</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var member in Model)
+        {
+            <tr>
+                <td>@member.FullName</td>
+
+                <td>@member.Bio</td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>

@@ -1,0 +1,23 @@
+﻿<h2>Phản hồi đánh giá</h2>
+
+<form method="post">
+
+    <input type="hidden"
+           name="reviewId"
+           value="@ViewBag.ReviewId" />
+
+    <div class="mb-3">
+
+        <label>Nội dung phản hồi</label>
+
+        <textarea name="replyContent"
+                  class="form-control"
+                  rows="5"></textarea>
+
+    </div>
+
+    <button class="btn btn-success">
+        Gửi phản hồi
+    </button>
+
+</form>

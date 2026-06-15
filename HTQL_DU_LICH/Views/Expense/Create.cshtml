@@ -1,0 +1,27 @@
+﻿@model HTQL_DU_LICH.ViewModels.CreateExpenseViewModel
+
+<h2>Thêm chi phí</h2>
+
+<form method="post">
+
+    <input asp-for="TripGroupId" type="hidden" />
+
+    <div>
+        <label>Tên chi phí</label>
+        <input asp-for="Title" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Số tiền</label>
+        <input asp-for="Amount" />
+    </div>
+
+    <br />
+
+    <button type="submit">
+        Lưu
+    </button>
+
+</form>

@@ -1,0 +1,51 @@
+﻿@model HTQL_DU_LICH.ViewModels.VendorRegisterViewModel
+
+<h2>Đăng ký Nhà Cung Cấp</h2>
+
+<form method="post">
+
+    <div>
+        <label>Tên doanh nghiệp</label>
+        <input asp-for="CompanyName" class="form-control" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Mô tả</label>
+        <textarea asp-for="Description"
+                  class="form-control"></textarea>
+    </div>
+
+    <br />
+
+    <div>
+        <label>Số điện thoại</label>
+        <input asp-for="Phone"
+               class="form-control" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Email</label>
+        <input asp-for="Email"
+               class="form-control" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Địa chỉ</label>
+        <input asp-for="Address"
+               class="form-control" />
+    </div>
+
+    <br />
+
+    <button type="submit"
+            class="btn btn-success">
+        Đăng ký nhà cung cấp
+    </button>
+
+</form>

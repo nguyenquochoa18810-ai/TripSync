@@ -1,0 +1,96 @@
+﻿@model IEnumerable<HTQL_DU_LICH.Models.Review>
+@using HTQL_DU_LICH.Models
+
+<h2>Danh sách đánh giá</h2>
+
+<table class="table">
+
+    <tr>
+        <th>Người dùng</th>
+        <th>Dịch vụ</th>
+        <th>Số sao</th>
+        <th>Nội dung</th>
+        <th>Phản hồi Vendor</th>
+        <th>Ngày tạo</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        var user =
+            ((List<ApplicationUser>)ViewBag.Users)
+            .FirstOrDefault(x =>
+                x.Id == item.UserId);
+
+        var booking =
+            ((List<Booking>)ViewBag.Bookings)
+            .FirstOrDefault(x =>
+                x.Id == item.BookingId);
+
+        Service? service = null;
+
+        if (booking != null)
+        {
+            service =
+                ((List<Service>)ViewBag.Services)
+                .FirstOrDefault(x =>
+                    x.Id == booking.ServiceId);
+        }
+
+        var reply =
+            ((List<ReviewReply>)ViewBag.Replies)
+            .FirstOrDefault(x =>
+                x.ReviewId == item.Id);
+
+        <tr>
+            <td>
+                @(user?.FullName ?? user?.Email)
+            </td>
+
+            <td>
+                @(service?.Name)
+            </td>
+
+            <td>
+                @item.Rating ⭐
+            </td>
+
+            <td>
+                @item.Comment
+            </td>
+
+            <td>
+
+                @if (reply != null)
+                {
+                    @reply.ReplyContent
+                }
+                else
+                {
+                    <span class="text-danger">
+                        Chưa phản hồi
+                    </span>
+
+                    @if (User.IsInRole("Vendor"))
+                    {
+                        <br />
+
+                        <a asp-controller="ReviewReply"
+                           asp-action="Create"
+                           asp-route-reviewId="@item.Id"
+                           class="btn btn-sm btn-primary">
+
+                            Phản hồi
+
+                        </a>
+                    }
+                }
+
+            </td>
+
+            <td>
+                @item.CreatedAt
+            </td>
+        </tr>
+    }
+
+</table>

@@ -1,0 +1,124 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.ExpenseListViewModel>
+
+<h2>Danh sách chi phí</h2>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Nhóm</th>
+        <th>Tiêu đề</th>
+        <th>Số tiền</th>
+        <th>Người trả</th>
+        <th>Trạng thái</th>
+        <th>Chi tiết</th>
+        <th>Tiến độ</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.TripName</td>
+
+            <td>@item.Title</td>
+
+            <td>
+                @item.Amount.ToString("N0") VNĐ
+            </td>
+
+            <td>@item.PaidBy</td>
+
+            <td>
+
+                @if (item.IsApproved)
+                {
+                    <span class="badge bg-success">
+                        Đã xác nhận
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-warning">
+                        Chờ xác nhận
+                    </span>
+
+                    @if (item.CanApprove)
+                    {
+                        <br />
+                        <br />
+
+                        <form asp-controller="Expense"
+                        asp-action="ApproveExpense"
+                        method="post">
+
+                            <input type="hidden"
+                            name="expenseId"
+                            value="@item.Id" />
+
+                            <button class="btn btn-success btn-sm">
+                                Xác nhận
+                            </button>
+
+                        </form>
+
+                        <br />
+
+                        <form asp-controller="Expense"
+                        asp-action="RejectExpense"
+                        method="post">
+
+                            <input type="hidden"
+                            name="expenseId"
+                            value="@item.Id" />
+
+                            <button class="btn btn-danger btn-sm">
+                                Từ chối
+                            </button>
+
+                        </form>
+
+                    }
+                }
+
+                    
+
+            </td>
+
+            <td>
+
+                <a asp-controller="Expense"
+                   asp-action="ExpenseDetails"
+                   asp-route-id="@item.Id"
+                   class="btn btn-info btn-sm">
+
+                    Xem chi tiết
+
+                </a>
+
+            </td>
+
+            <td>
+                @item.ApprovedCount /
+                @item.TotalApprovals
+            </td>
+
+        </tr>
+    }
+
+</table>
+
+<br />
+
+<a asp-action="Summary"
+   class="btn btn-primary">
+    Tổng quan tài chính
+</a>
+
+<a asp-action="Debts"
+   class="btn btn-warning">
+    Công nợ
+</a>
+
+<a asp-action="Transactions"
+   class="btn btn-info">
+    Lịch sử giao dịch
+</a>

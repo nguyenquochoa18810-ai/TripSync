@@ -1,0 +1,28 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.InterestSelectionViewModel>
+
+<h2>Sở thích du lịch</h2>
+
+<form method="post">
+
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        <div>
+
+            <input asp-for="@Model[i].IsSelected" />
+
+            <input asp-for="@Model[i].Id" type="hidden" />
+
+            <input asp-for="@Model[i].Name" type="hidden" />
+
+            @Model[i].Name
+
+        </div>
+    }
+
+    <br />
+
+    <button class="btn btn-success">
+        Lưu sở thích
+    </button>
+
+</form>

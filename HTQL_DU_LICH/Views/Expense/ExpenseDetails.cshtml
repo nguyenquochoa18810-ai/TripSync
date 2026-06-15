@@ -1,0 +1,89 @@
+﻿@model HTQL_DU_LICH.ViewModels.ExpenseDetailsViewModel
+
+<h2>Chi tiết khoản chi</h2>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Khoản chi</th>
+        <td>@Model.ExpenseTitle</td>
+    </tr>
+
+    <tr>
+        <th>Số tiền</th>
+        <td>@Model.Amount.ToString("N0") VNĐ</td>
+    </tr>
+
+    <tr>
+        <th>Người tạo</th>
+        <td>@Model.PaidBy</td>
+    </tr>
+
+</table>
+
+<hr />
+
+<h4>Tiến độ xác nhận</h4>
+
+<p>
+    <strong>
+        @Model.ApprovedCount /
+        @Model.TotalApprovals
+    </strong>
+    thành viên đã xác nhận
+</p>
+
+@if (Model.IsApproved)
+{
+    <div class="alert alert-success">
+
+        Khoản chi đã được duyệt và
+        đã được tính vào công nợ.
+
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+
+        Đang chờ xác nhận từ các
+        thành viên còn lại.
+
+    </div>
+}
+
+
+<h4>Danh sách xác nhận</h4>
+
+<table class="table table-striped">
+
+    <tr>
+        <th>Thành viên</th>
+        <th>Trạng thái</th>
+    </tr>
+
+    @foreach (var item in Model.Approvals)
+    {
+        <tr>
+            <td>@item.UserName</td>
+
+            <td>
+
+                @if (item.IsApproved)
+                {
+                    <span class="badge bg-success">
+                        Đã xác nhận
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-warning">
+                        Chờ xác nhận
+                    </span>
+                }
+
+            </td>
+        </tr>
+    }
+
+</table>

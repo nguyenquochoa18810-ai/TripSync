@@ -1,0 +1,459 @@
+﻿@model HTQL_DU_LICH.Models.TripGroup
+
+<h2>Chi tiết chuyến đi</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-warning">
+        @TempData["Message"]
+    </div>
+}
+
+<p style="color:red">
+    Current User:
+    @User.Identity?.Name
+</p>
+
+@if (!(bool)ViewBag.IsLeader)
+{
+    <a asp-action="Leave"
+       asp-route-id="@Model.Id"
+       class="btn btn-warning">
+        Rời nhóm
+    </a>
+}
+
+<table class="table">
+    <tr>
+        <th>Tên nhóm</th>
+        <td>@Model.Title</td>
+    </tr>
+    <tr>
+        <th>Điểm đến</th>
+        <td>@Model.Destination</td>
+    </tr>
+    <tr>
+        <th>Ngày đi</th>
+        <td>@Model.StartDate.ToShortDateString()</td>
+    </tr>
+    <tr>
+        <th>Ngày về</th>
+        <td>@Model.EndDate.ToShortDateString()</td>
+    </tr>
+    <tr>
+        <th>Ngân sách</th>
+        <td>@Model.Budget.ToString("N0") VNĐ</td>
+    </tr>
+    <tr>
+        <th>Mô tả</th>
+        <td>@Model.Description</td>
+    </tr>
+</table>
+
+<h4>Trưởng nhóm</h4>
+
+@if (ViewBag.Leader != null)
+{
+    <p>
+        @ViewBag.Leader.FullName
+        (@ViewBag.Leader.Email)
+    </p>
+
+    @if (ViewBag.Leader.Id == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+    {
+        <a asp-action="Delete"
+           asp-route-id="@Model.Id"
+           class="btn btn-danger">
+            Xóa nhóm
+        </a>
+    }
+}
+<br />
+
+@if (ViewBag.Leader?.Id != User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+{
+    @if (!(bool)ViewBag.IsMember)
+    {
+        <form asp-action="Join"
+              asp-route-id="@Model.Id"
+              method="post">
+
+            <button class="btn btn-success">
+                Gửi yêu cầu tham gia
+            </button>
+
+        </form>
+    }
+}
+<br />
+
+<a asp-action="Members"
+   asp-route-id="@Model.Id">
+    Xem thành viên
+</a>
+<hr />
+
+<p>
+    Tổng thành viên:
+    @ViewBag.Members.Count
+</p>
+
+<h3>Thành viên</h3>
+<table class="table">
+    @foreach (var member in ViewBag.Members)
+    {
+        <tr>
+            <td>
+                @if (!string.IsNullOrEmpty(member.AvatarUrl))
+                {
+                    <img src="@member.AvatarUrl"
+                         width="60"
+                         height="60" />
+                }
+            </td>
+            <td>@member.FullName</td>
+            <td>@member.Email</td>
+        </tr>
+    }
+</table>
+<hr />
+
+<h4>Chat nhóm</h4>
+
+<div id="chatBox"
+     class="border p-3"
+     style="height:300px;overflow-y:auto">
+
+    @if (ViewBag.Messages != null)
+    {
+        foreach (var msg in ViewBag.Messages)
+        {
+            <div class="border p-2 mb-1">
+
+                <b>@msg.UserName</b>
+
+                <small>
+                    @msg.Time
+                </small>
+
+                <br />
+
+                @msg.Message
+
+            </div>
+        }
+    }
+
+</div>
+
+<script>
+    window.onload = function ()
+    {
+        var box =
+            document.getElementById("chatBox");
+
+        box.scrollTop =
+            box.scrollHeight;
+    }
+</script>
+    
+
+
+
+<form asp-action="SendMessage"
+      method="post">
+
+    <input type="hidden"
+           name="tripId"
+           value="@Model.Id" />
+
+    <div class="input-group">
+
+        <input name="message"
+               class="form-control"
+               placeholder="Nhập tin nhắn..." />
+
+        <button class="btn btn-primary">
+            Gửi
+        </button>
+
+    </div>
+
+</form>
+
+<hr />
+
+
+<h4>Dịch vụ đã áp dụng</h4>
+
+<table class="table">
+
+    <tr>
+        <th>Tên dịch vụ</th>
+        <th>Ngày áp dụng</th>
+        <th>Đồng ý</th>
+        
+        <th>Thao tác</th>
+    </tr>
+
+    @if (ViewBag.AppliedServices != null)
+    {
+        foreach (var item in ViewBag.AppliedServices)
+        {
+            <tr>
+                <td>
+                    @item.ServiceName
+
+                    <a asp-controller="ExploreService"
+                       asp-action="Details"
+                       asp-route-id="@item.ServiceId"
+                       class="btn btn-info btn-sm">
+
+                        Chi tiết
+
+                    </a>
+                </td>
+
+                <td>
+    @item.AppliedAt.ToString("dd/MM/yyyy")
+</td>
+
+                <td>
+                    @{
+                        var votes =
+                            ((List<HTQL_DU_LICH.Models.ServiceRequestVote>)
+                            ViewBag.ServiceVotes)
+                            .Count(x =>
+                                x.ServiceRequestId == item.Id
+                                && x.IsApproved);
+                    }
+
+                    @votes
+                </td>
+
+<td>
+
+                    @if ((bool)ViewBag.IsLeader)
+                    {
+                        bool expenseExists =
+                            ((List<HTQL_DU_LICH.Models.Expense>)
+                            ViewBag.Expenses)
+                            .Any(x => x.Title == item.ServiceName);
+
+                        if (!expenseExists)
+                        {
+                            <form asp-action="ConfirmTripService"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="tripServiceId"
+                                       value="@item.Id" />
+
+                                <button class="btn btn-success btn-sm">
+                                    Xác nhận
+                                </button>
+
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">
+                                Đã tạo chi phí
+                            </span>
+                        }
+
+                        <form asp-action="RemoveService"
+                              method="post"
+                              class="mt-1">
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@item.Id" />
+
+                            <button class="btn btn-danger btn-sm">
+                                Xóa
+                            </button>
+
+                        </form>
+                    }
+
+</td>
+               
+            </tr>
+        }
+    }
+
+</table>
+<h4>Yêu cầu sử dụng dịch vụ</h4>
+
+<table class="table">
+
+    <tr>
+        <th>Dịch vụ</th>
+        <th>Đồng ý</th>
+        <th>Từ chối</th>
+        <th>Thao tác</th>
+    </tr>
+
+    @foreach (var item in ViewBag.ServiceRequests)
+    {
+        @if (item.Status == "Approved")
+        {
+            <tr>
+                <td>@item.ServiceName</td>
+                <td colspan="3">
+
+                    <span class="badge bg-success">
+
+                        Đã xác nhận
+
+                    </span>
+
+                </td>
+            </tr>
+
+            continue;
+        }
+        var yes =
+        ((List<HTQL_DU_LICH.Models.ServiceRequestVote>)
+        ViewBag.ServiceVotes)
+        .Count(x =>
+            x.ServiceRequestId == item.Id
+            &&
+            x.IsApproved);
+
+        var no =
+        ((List<HTQL_DU_LICH.Models.ServiceRequestVote>)
+        ViewBag.ServiceVotes)
+        .Count(x =>
+            x.ServiceRequestId == item.Id
+            &&
+            !x.IsApproved);
+
+        <tr>
+
+            <td>
+                @item.ServiceName
+            </td>
+
+            <td>
+                @yes
+            </td>
+
+            <td>
+                @no
+            </td>
+
+            <td>
+
+                @{
+                    string currentUserId =
+                        User.FindFirst(
+                            System.Security.Claims.ClaimTypes.NameIdentifier
+                        )?.Value;
+
+                    bool voted =
+                        ((List<HTQL_DU_LICH.Models.ServiceRequestVote>)
+                        ViewBag.ServiceVotes)
+                        .Any(x =>
+                            x.ServiceRequestId == item.Id &&
+                            x.UserId == currentUserId);
+                }
+
+                @if (!voted)
+                {
+                    <form asp-action="ApproveService"
+                          method="post">
+
+                        <input type="hidden"
+                               name="requestId"
+                               value="@item.Id" />
+
+                        <button class="btn btn-success">
+                            Đồng ý
+                        </button>
+
+                    </form>
+
+                    <form asp-action="RejectService"
+                          method="post">
+
+                        <input type="hidden"
+                               name="requestId"
+                               value="@item.Id" />
+
+                        <button class="btn btn-danger">
+                            Từ chối
+                        </button>
+
+                    </form>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">
+                        Đã bỏ phiếu
+                    </span>
+                }
+
+            </td>
+
+        </tr>
+    }
+
+</table>
+<h3>Chi phí</h3>
+
+<a asp-controller="Expense"
+   asp-action="Create"
+   asp-route-tripId="@Model.Id"
+   class="btn btn-success">
+    Thêm chi phí
+</a>
+
+<table class="table">
+    <tr>
+        <th>Tiêu đề</th>
+        <th>Số tiền</th>
+    </tr>
+
+    @foreach (var expense in ViewBag.Expenses)
+    {
+        <tr>
+            <td>@expense.Title</td>
+            <td>@expense.Amount.ToString("N0") VNĐ</td>
+        </tr>
+    }
+</table>
+
+<hr />
+
+<h4>Tổng chi phí nhóm</h4>
+
+<p>
+    @Convert.ToDecimal(ViewBag.TotalExpense).ToString("N0") VNĐ
+</p>
+
+<hr />
+
+
+
+@if ((bool)ViewBag.IsLeader)
+{
+    <hr />
+
+    <a asp-controller="JoinRequest"
+       asp-action="Manage"
+       asp-route-tripId="@Model.Id"
+       class="btn btn-warning">
+        Quản lý yêu cầu tham gia
+    </a>
+}
+
+@if ((bool)ViewBag.IsLeader)
+{
+    <a asp-action="Delete"
+       asp-route-id="@Model.Id"
+       class="btn btn-danger mt-2">
+        Xóa nhóm
+    </a>
+}

@@ -1,0 +1,62 @@
+﻿@model HTQL_DU_LICH.Models.Vendor
+
+@{
+    Layout = "~/Views/Shared/_VendorLayout.cshtml";
+}
+
+<h2>Hồ sơ doanh nghiệp</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+<form asp-action="Update"
+      method="post">
+
+    <input type="hidden"
+           asp-for="Id" />
+
+    <div class="mb-3">
+        <label>Tên doanh nghiệp</label>
+
+        <input asp-for="CompanyName"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Mô tả</label>
+
+        <textarea asp-for="Description"
+                  class="form-control">
+        </textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Số điện thoại</label>
+
+        <input asp-for="Phone"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+
+        <input asp-for="Email"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Địa chỉ</label>
+
+        <input asp-for="Address"
+               class="form-control" />
+    </div>
+
+    <button class="btn btn-primary">
+        Lưu thay đổi
+    </button>
+
+</form>

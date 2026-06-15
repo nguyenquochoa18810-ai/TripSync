@@ -1,0 +1,93 @@
+﻿@model HTQL_DU_LICH.ViewModels.VendorDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_VendorLayout.cshtml";
+}
+
+<h2>
+    Vendor Dashboard
+</h2>
+
+<div class="row g-4 mt-2">
+
+    <div class="col-md-3">
+
+        <div class="card border-primary">
+
+            <div class="card-body">
+
+                <h6>
+                    Dịch vụ
+                </h6>
+
+                <h2>
+                    @Model.TotalServices
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-success">
+
+            <div class="card-body">
+
+                <h6>
+                    Booking
+                </h6>
+
+                <h2>
+                    @Model.TotalBookings
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-warning">
+
+            <div class="card-body">
+
+                <h6>
+                    Chờ xác nhận
+                </h6>
+
+                <h2>
+                    @Model.PendingBookings
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-danger">
+
+            <div class="card-body">
+
+                <h6>
+                    Đánh giá
+                </h6>
+
+                <h2>
+                    @Model.TotalReviews
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

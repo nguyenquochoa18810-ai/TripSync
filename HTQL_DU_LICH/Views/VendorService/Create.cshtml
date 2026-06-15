@@ -1,0 +1,40 @@
+﻿@model HTQL_DU_LICH.Models.Service
+
+<h2>Thêm dịch vụ</h2>
+
+<form method="post">
+
+    <label>Tên dịch vụ</label>
+    <input asp-for="Name"
+           class="form-control" />
+
+    <label>Loại dịch vụ</label>
+
+    <select asp-for="ServiceType"
+            class="form-control">
+
+        <option>Hotel</option>
+
+        <option>Homestay</option>
+
+        <option>Car Rental</option>
+
+    </select>
+
+    <label>Mô tả</label>
+
+    <textarea asp-for="Description"
+              class="form-control"></textarea>
+
+    <label>Giá</label>
+
+    <input asp-for="Price"
+           class="form-control" />
+
+    <br />
+
+    <button class="btn btn-success">
+        Lưu
+    </button>
+
+</form>

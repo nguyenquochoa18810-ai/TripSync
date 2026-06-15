@@ -1,0 +1,22 @@
+﻿@model IEnumerable<HTQL_DU_LICH.Models.ReviewReply>
+
+<h2>Danh sách phản hồi đánh giá</h2>
+
+<table class="table">
+
+    <tr>
+        <th>ReviewId</th>
+        <th>Nội dung phản hồi</th>
+        <th>Ngày tạo</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.ReviewId</td>
+            <td>@item.ReplyContent</td>
+            <td>@item.CreatedAt</td>
+        </tr>
+    }
+
+</table>

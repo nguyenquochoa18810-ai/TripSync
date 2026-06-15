@@ -1,0 +1,41 @@
+﻿@model HTQL_DU_LICH.Models.Review
+
+<h2>Đánh giá dịch vụ</h2>
+
+<form method="post">
+
+    <input asp-for="BookingId" type="hidden" />
+
+    <div>
+        <label>Số sao</label>
+
+        <select asp-for="Rating">
+
+            <option value="5">5 ⭐</option>
+            <option value="4">4 ⭐</option>
+            <option value="3">3 ⭐</option>
+            <option value="2">2 ⭐</option>
+            <option value="1">1 ⭐</option>
+
+        </select>
+    </div>
+
+    <br />
+
+    <div>
+
+        <label>Nhận xét</label>
+
+        <textarea asp-for="Comment"
+                  class="form-control">
+        </textarea>
+
+    </div>
+
+    <br />
+
+    <button class="btn btn-success">
+        Gửi đánh giá
+    </button>
+
+</form>

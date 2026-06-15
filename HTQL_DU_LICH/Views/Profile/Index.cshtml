@@ -1,0 +1,70 @@
+﻿@model HTQL_DU_LICH.Models.ApplicationUser
+@if (!string.IsNullOrEmpty(Model.AvatarUrl))
+{
+    <img src="@Model.AvatarUrl"
+         width="150"
+         height="150"
+         class="rounded-circle" />
+}
+
+<h2>Hồ sơ cá nhân</h2>
+
+@if (ViewBag.Success != null)
+{
+    <div style="color:green">
+        @ViewBag.Success
+    </div>
+}
+
+<hr />
+
+<h3>Ảnh đại diện</h3>
+
+@if (!string.IsNullOrEmpty(Model.AvatarUrl))
+{
+    <img src="@Model.AvatarUrl"
+         width="150"
+         height="150" />
+}
+
+<form asp-action="UploadAvatar"
+      method="post"
+      enctype="multipart/form-data">
+
+    <input type="file"
+           name="AvatarFile" />
+
+    <button type="submit">
+        Upload Avatar
+    </button>
+
+</form>
+
+<hr />
+
+<form method="post">
+
+    <div>
+        <label>Họ tên</label>
+        <input asp-for="FullName" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Giới thiệu</label>
+        <textarea asp-for="Bio"></textarea>
+    </div>
+
+    <br />
+
+    <button type="submit">
+        Lưu thông tin
+    </button>
+
+    <a asp-action="Edit"
+       class="btn btn-warning">
+        Chỉnh sửa hồ sơ
+    </a>
+
+</form>

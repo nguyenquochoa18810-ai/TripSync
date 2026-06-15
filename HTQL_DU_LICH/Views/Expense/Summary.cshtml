@@ -1,0 +1,74 @@
+﻿@model HTQL_DU_LICH.ViewModels.ExpenseSummaryViewModel
+
+<h2>Tổng quan tài chính</h2>
+
+<div class="alert alert-info">
+    <h4>💰 Tổng chi phí các chuyến đi</h4>
+
+    <strong>
+        @Model.TotalExpense.ToString("N0") VNĐ
+    </strong>
+</div>
+
+<div class="alert alert-warning">
+    <h4>📌 Số tiền bạn cần thanh toán</h4>
+
+    <strong>
+        @Model.YouOwe.ToString("N0") VNĐ
+    </strong>
+</div>
+
+<div class="alert alert-success">
+    <h4>📌 Số tiền thành viên khác cần thanh toán cho bạn</h4>
+
+    <strong>
+        @Model.YouAreOwed.ToString("N0") VNĐ
+    </strong>
+</div>
+
+
+
+<hr />
+
+<h4>Chi tiết cách tính</h4>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Khoản chi</th>
+        <th>Người trả</th>
+        <th>Tổng tiền</th>
+        <th>Số thành viên</th>
+        <th>Phần của bạn</th>
+    </tr>
+
+    @foreach (var item in Model.DebtDetails)
+    {
+        <tr>
+            <td>@item.ExpenseTitle</td>
+
+            <td>@item.PaidBy</td>
+
+            <td>
+                @item.ExpenseAmount.ToString("N0") VNĐ
+            </td>
+
+            <td>@item.MemberCount</td>
+
+            <td>
+                @item.YourShare.ToString("N0") VNĐ
+            </td>
+        </tr>
+    }
+
+</table>
+
+<div class="alert alert-info">
+
+    <b>Cách tính:</b>
+
+    <br />
+
+    Phần phải trả = Tổng chi phí ÷ Số thành viên.
+
+</div>

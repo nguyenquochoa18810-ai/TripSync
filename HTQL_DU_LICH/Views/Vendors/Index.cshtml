@@ -1,0 +1,55 @@
+@model IEnumerable<HTQL_DU_LICH.Models.Vendor>
+
+@{
+    ViewData["Title"] = "Danh sách nhà cung cấp";
+}
+
+<h1>Danh sách đối tác (Vendors)</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Tạo mới</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tên doanh nghiệp</th>
+            <th>Mô tả</th>
+            <th>Số điện thoại</th>
+            <th>Email</th>
+            <th>Địa chỉ</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CompanyName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Phone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Address)
+                </td>
+                <td>
+                    @(item.IsApproved ? "Đã duyệt" : "Chờ duyệt")
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Sửa</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Chi tiết</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

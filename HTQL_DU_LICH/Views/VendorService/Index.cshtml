@@ -1,0 +1,62 @@
+﻿@model IEnumerable<HTQL_DU_LICH.Models.Service>
+
+<h2>Dịch vụ của tôi</h2>
+
+<a asp-action="Create"
+   class="btn btn-success">
+
+    Thêm dịch vụ
+
+</a>
+
+<table class="table">
+
+    <tr>
+        <th>Tên</th>
+        <th>Loại</th>
+        <th>Giá</th>
+        <th>Trạng thái</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+
+            <td>@item.Name</td>
+
+            <td>@item.ServiceType</td>
+
+            <td>
+                @item.Price.ToString("N0")
+            </td>
+
+            <td>
+                @(item.IsActive
+                    ? "Đang hoạt động"
+                    : "Ẩn")
+            </td>
+
+            <td>
+
+                <a asp-action="Edit"
+                   asp-route-id="@item.Id"
+                   class="btn btn-warning">
+
+                    Sửa
+
+                </a>
+
+                <a asp-action="Delete"
+                   asp-route-id="@item.Id"
+                   class="btn btn-danger">
+
+                    Xóa
+
+                </a>
+
+            </td>
+
+        </tr>
+    }
+</table>

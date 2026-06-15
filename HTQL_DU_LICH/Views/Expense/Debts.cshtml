@@ -1,0 +1,65 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.DebtViewModel>
+
+<h2>Công nợ chuyến đi</h2>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Chuyến đi</th>
+        <th>Khoản chi</th>
+        <th>Người cần thanh toán</th>
+        <th>Người đã thanh toán</th>
+        <th>Số tiền cần trả</th>
+        <th>Trạng thái</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.TripName</td>
+
+            <td>@item.ExpenseTitle</td>
+
+            <td>@item.DebtorName</td>
+
+            <td>@item.CreditorName</td>
+
+            <td>
+                @item.Amount.ToString("N0") VNĐ
+            </td>
+
+            <td>
+                @if (item.IsPaid)
+                {
+                    <span class="badge bg-success">
+                        Đã thanh toán
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">
+                        Chưa thanh toán
+                    </span>
+
+                    <br />
+                    <br />
+
+                    <form asp-controller="Expense"
+                          asp-action="MarkPaid"
+                          method="post">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@item.ExpenseSplitId" />
+
+                        <button class="btn btn-success btn-sm">
+                            Xác nhận thanh toán
+                        </button>
+
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+
+</table>

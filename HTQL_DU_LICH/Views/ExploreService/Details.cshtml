@@ -1,0 +1,91 @@
+﻿@model HTQL_DU_LICH.Models.Service
+
+<h2>@Model.Name</h2>
+
+<div class="alert alert-info">
+
+    ⭐ Điểm trung bình:
+
+    <b>
+        @Convert.ToDouble(
+            ViewBag.AverageRating
+        ).ToString("0.0")
+    </b>
+
+    |
+
+    @ViewBag.TotalReviews đánh giá
+
+</div>
+
+<table class="table">
+
+    <tr>
+        <th>Loại dịch vụ</th>
+        <td>@Model.ServiceType</td>
+    </tr>
+
+    <tr>
+        <th>Giá</th>
+        <td>
+            @Model.Price.ToString("N0") VNĐ
+        </td>
+    </tr>
+
+    <tr>
+        <th>Mô tả</th>
+        <td>@Model.Description</td>
+    </tr>
+
+</table>
+
+<hr />
+
+<h4>Đánh giá gần đây</h4>
+
+<hr />
+
+<h4>Thêm dịch vụ vào nhóm</h4>
+
+@if (ViewBag.MyTrips != null)
+{
+    <table class="table">
+
+        
+        @foreach (var trip in ViewBag.MyTrips)
+        {
+            <tr>
+
+                <td>
+                    @trip.Title
+                </td>
+
+                <td>
+
+                    <form asp-action="ApplyToTrip"
+                          method="post">
+
+                        <input type="hidden"
+                               name="serviceId"
+                               value="@Model.Id" />
+
+                        <input type="hidden"
+                               name="tripId"
+                               value="@trip.Id" />
+
+                        <button class="btn btn-success">
+
+                            Thêm vào nhóm
+
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+        }
+
+    </table>
+
+}

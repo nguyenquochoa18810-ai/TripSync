@@ -1,0 +1,61 @@
+﻿
+@model IEnumerable<HTQL_DU_LICH.Models.Booking>
+
+<h2>Danh sách đặt chỗ</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Service</th>
+            <th>Ngày đặt</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @{
+                        var trip =
+                            ((List<TripGroup>)ViewBag.Trips)
+                            .FirstOrDefault(x =>
+                                x.Id == item.TripGroupId);
+                    }
+
+                    @(trip?.Title)
+                </td>
+
+                <td>
+                    @{
+                        var service =
+                            ((List<Service>)ViewBag.Services)
+                            .FirstOrDefault(x =>
+                                x.Id == item.ServiceId);
+                    }
+
+                    @(service?.Name)
+                </td>
+                <td>@item.BookingDate</td>
+                <td>@item.Status</td>
+                <td>
+                    @if (item.Status == "Pending")
+                    {
+                        <a asp-action="Confirm" asp-route-id="@item.Id" class="btn btn-success">
+                            Xác nhận
+                        </a>
+                    }
+
+                    @if (item.Status == "Confirmed")
+                    {
+                        <a asp-action="Complete" asp-route-id="@item.Id" class="btn btn-primary">
+                            Hoàn thành
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

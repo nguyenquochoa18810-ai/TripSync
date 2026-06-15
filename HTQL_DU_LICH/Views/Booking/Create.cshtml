@@ -1,0 +1,46 @@
+﻿@model HTQL_DU_LICH.Models.Booking
+@using HTQL_DU_LICH.Models
+
+<h2>Đặt dịch vụ</h2>
+
+<form method="post">
+
+    <div>
+        <label>Chọn nhóm</label>
+
+        <select asp-for="TripGroupId">
+
+            @foreach (var trip in (List<TripGroup>)ViewBag.Trips)
+            {
+                <option value="@trip.Id">
+                    @trip.Title
+                </option>
+            }
+
+        </select>
+    </div>
+
+    <br />
+
+    <div>
+        <label>Chọn dịch vụ</label>
+
+        <select asp-for="ServiceId">
+
+            @foreach (var service in (List<Service>)ViewBag.Services)
+            {
+                <option value="@service.Id">
+                    @service.Name
+                </option>
+            }
+
+        </select>
+    </div>
+
+    <br />
+
+    <button type="submit">
+        Đặt chỗ
+    </button>
+
+</form>

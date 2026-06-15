@@ -1,0 +1,66 @@
+﻿@model IEnumerable<HTQL_DU_LICH.ViewModels.VendorBookingViewModel>
+
+<h2>Booking dịch vụ của tôi</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Khách hàng</th>
+            <th>Dịch vụ</th>
+            <th>Ngày đặt</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.CustomerName
+                </td>
+                <td>
+                    @item.ServiceName
+                </td>
+                <td>
+                    @item.BookingDate
+                </td>
+                <td>
+                    @item.Status
+                </td>
+                <td>
+                    @if (item.Status == "Pending")
+                    {
+                        <a asp-controller="VendorBooking"
+                           asp-action="Confirm"
+                           asp-route-id="@item.Id"
+                           class="btn btn-success">
+
+                            Xác nhận
+
+                        </a>
+
+                        <a asp-controller="VendorBooking"
+                           asp-action="Cancel"
+                           asp-route-id="@item.Id"
+                           class="btn btn-danger">
+
+                            Hủy
+
+                        </a>
+                    }
+
+                    @if (item.Status == "Confirmed")
+                    {
+                        <a asp-controller="VendorBooking"
+                           asp-action="Complete"
+                           asp-route-id="@item.Id"
+                           class="btn btn-primary">
+                            Hoàn thành
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,75 @@
+﻿@model IEnumerable<HTQL_DU_LICH.ViewModels.MyBookingViewModel>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-warning">
+
+        @TempData["Error"]
+
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+
+        @TempData["Success"]
+
+    </div>
+}
+
+<h2>Booking của tôi</h2>
+
+<table class="table">
+
+    <tr>
+        <th>Nhóm</th>
+        <th>Dịch vụ</th>
+        <th>Ngày đặt</th>
+        <th>Đánh giá</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+
+            <td>@item.TripName</td>
+
+            <td>@item.ServiceName</td>
+
+            <td>
+                @item.BookingDate.ToString("dd/MM/yyyy")
+            </td>
+
+            <td>
+
+                @item.Status
+
+                <br />
+
+                @if (item.Status == "Completed")
+                {
+                    if (item.IsReviewed)
+                    {
+                        <span class="badge bg-success">
+                            Đã đánh giá
+                        </span>
+                    }
+                    else
+                    {
+                        <a asp-controller="Review"
+                           asp-action="Create"
+                           asp-route-bookingId="@item.Id"
+                           class="btn btn-warning btn-sm">
+
+                            Đánh giá
+
+                        </a>
+                    }
+                }
+
+            </td>
+
+        </tr>
+    }
+
+</table>

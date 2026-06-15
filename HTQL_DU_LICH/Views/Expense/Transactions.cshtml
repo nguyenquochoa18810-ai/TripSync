@@ -1,0 +1,57 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.TransactionHistoryViewModel>
+
+<h2>Lịch sử giao dịch</h2>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Ngày thanh toán</th>
+        <th>Chuyến đi</th>
+        <th>Khoản chi</th>
+        <th>Người chuyển</th>
+        <th>Người nhận</th>
+        <th>Số tiền</th>
+        <th>Trạng thái</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+
+            <td>
+                @(item.PaidAt?.ToString("dd/MM/yyyy HH:mm"))
+            </td>
+
+            <td>@item.TripName</td>
+
+            <td>@item.ExpenseTitle</td>
+
+            <td>@item.Sender</td>
+
+            <td>@item.Receiver</td>
+
+            <td>
+                @item.Amount.ToString("N0") VNĐ
+            </td>
+
+            <td>
+
+                @if (item.IsCompleted)
+                {
+                    <span class="badge bg-success">
+                        Hoàn tất
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-warning">
+                        Đang xử lý
+                    </span>
+                }
+
+            </td>
+
+        </tr>
+    }
+
+</table>

@@ -1,0 +1,47 @@
+﻿<h2>Quản lý yêu cầu tham gia</h2>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Người dùng</th>
+        <th>Email</th>
+        <th>Ngày gửi</th>
+        <th>Trạng thái</th>
+        <th>Xử lý</th>
+    </tr>
+
+    @foreach (var item in ViewBag.Requests)
+    {
+        <tr>
+
+            <td>@item.UserName</td>
+
+            <td>@item.Email</td>
+
+            <td>@item.RequestDate</td>
+
+            <td>@item.Status</td>
+
+            <td>
+
+                @if (item.Status == "Pending")
+                {
+                    <a asp-action="Approve"
+                       asp-route-id="@item.Id"
+                       class="btn btn-success">
+                        Duyệt
+                    </a>
+
+                    <a asp-action="Reject"
+                       asp-route-id="@item.Id"
+                       class="btn btn-danger">
+                        Từ chối
+                    </a>
+                }
+
+            </td>
+
+        </tr>
+    }
+
+</table>

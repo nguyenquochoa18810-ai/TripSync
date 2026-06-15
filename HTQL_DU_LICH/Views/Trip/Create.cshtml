@@ -1,0 +1,64 @@
+﻿@model HTQL_DU_LICH.ViewModels.CreateTripViewModel
+
+<h2>Tạo chuyến đi mới</h2>
+
+<form method="post">
+    <div>
+        <label>Tên chuyến đi</label>
+        <input asp-for="Title" />
+    </div>
+    <br />
+
+    <div>
+        <label>Điểm đến</label>
+        <input asp-for="Destination" />
+    </div>
+    <br />
+
+    <div>
+        <label>Ngày khởi hành</label>
+        <input asp-for="StartDate" type="date" />
+    </div>
+    <br />
+
+    <div>
+        <label>Ngày kết thúc</label>
+        <input asp-for="EndDate" type="date" />
+    </div>
+    <br />
+
+    <div>
+        <label>Ngân sách</label>
+        <input asp-for="Budget" />
+    </div>
+    <br />
+
+    <div>
+        <label>Mô tả</label>
+        <textarea asp-for="Description"></textarea>
+    </div>
+    <br />
+
+    <!-- ========================================== -->
+    <!-- ĐOẠN CODE SỞ THÍCH NHÓM ĐƯỢC THÊM VÀO ĐÂY -->
+    <!-- ========================================== -->
+    <div class="mb-3">
+        <label>Sở thích nhóm</label>
+
+        @foreach (var interest in ViewBag.Interests)
+        {
+            <div>
+                <input type="checkbox"
+                       name="SelectedInterests"
+                       value="@interest.Id" />
+
+                @interest.Name
+            </div>
+        }
+    </div>
+    <br />
+
+    <button type="submit">
+        Tạo chuyến đi
+    </button>
+</form>

@@ -1,0 +1,16 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using HTQL_DU_LICH.Models
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    if (User.Identity != null
+        && User.Identity.IsAuthenticated
+        && User.IsInRole("Vendor"))
+    {
+        Layout = "_VendorLayout";
+    }
+    else
+    {
+        Layout = "_UserLayout";
+    }
+}

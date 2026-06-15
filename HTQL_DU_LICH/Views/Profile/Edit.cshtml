@@ -1,0 +1,38 @@
+﻿@model HTQL_DU_LICH.ViewModels.ProfileEditViewModel
+
+<h2>Chỉnh sửa hồ sơ</h2>
+
+<form asp-action="Edit"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div class="mb-3">
+        <label>Họ tên</label>
+
+        <input type="text"
+               name="FullName"
+               value="@Model.FullName"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Tiểu sử</label>
+
+        <textarea name="Bio"
+                  class="form-control">@Model.Bio</textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Ảnh đại diện</label>
+
+        <input type="file"
+               name="AvatarFile"
+               class="form-control" />
+    </div>
+
+    <button type="submit"
+            class="btn btn-success">
+        Lưu
+    </button>
+
+</form>

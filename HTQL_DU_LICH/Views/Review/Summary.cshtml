@@ -1,0 +1,49 @@
+﻿@model HTQL_DU_LICH.ViewModels.ServiceReviewSummaryViewModel
+
+<h2>@Model.ServiceName</h2>
+
+<div class="alert alert-info">
+
+    <h4>
+        ⭐ Trung bình:
+        @Model.AverageRating.ToString("0.0")
+    </h4>
+
+</div>
+
+<div class="alert alert-success">
+
+    Tổng lượt đánh giá:
+
+    <b>@Model.TotalReviews</b>
+
+</div>
+
+<table class="table table-bordered">
+
+    <tr>
+        <td>5 sao</td>
+        <td>@Model.FiveStar</td>
+    </tr>
+
+    <tr>
+        <td>4 sao</td>
+        <td>@Model.FourStar</td>
+    </tr>
+
+    <tr>
+        <td>3 sao</td>
+        <td>@Model.ThreeStar</td>
+    </tr>
+
+    <tr>
+        <td>2 sao</td>
+        <td>@Model.TwoStar</td>
+    </tr>
+
+    <tr>
+        <td>1 sao</td>
+        <td>@Model.OneStar</td>
+    </tr>
+
+</table>

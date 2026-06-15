@@ -1,0 +1,45 @@
+﻿@model List<HTQL_DU_LICH.Models.TripGroup>
+
+<h2>Tìm kiếm chuyến đi</h2>
+
+<form method="get">
+
+    <input type="text"
+           name="keyword"
+           placeholder="Nhập tên nhóm hoặc điểm đến" />
+
+    <button type="submit">
+        Tìm kiếm
+    </button>
+
+</form>
+
+<br />
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Tên nhóm</th>
+        <th>Điểm đến</th>
+        <th>Ngân sách</th>
+        <th></th>
+    </tr>
+
+    @foreach (var trip in Model)
+    {
+        <tr>
+            <td>@trip.Title</td>
+            <td>@trip.Destination</td>
+            <td>@trip.Budget</td>
+
+            <td>
+                <a asp-controller="Trip"
+                   asp-action="Details"
+                   asp-route-id="@trip.Id">
+                    Xem
+                </a>
+            </td>
+        </tr>
+    }
+
+</table>

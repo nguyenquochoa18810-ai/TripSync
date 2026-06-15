@@ -1,0 +1,133 @@
+﻿@model HTQL_DU_LICH.ViewModels.DashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<h2 class="mb-4">
+    Xin chào 👋
+</h2>
+
+<div class="row g-4">
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6>
+                    Chuyến đi gần nhất
+                </h6>
+
+                <h4>
+                    @Model.LatestTripName
+                </h4>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6>
+                    Booking gần nhất
+                </h6>
+
+                <h4>
+                    @Model.LatestBookingService
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6>
+                    Công nợ
+                </h6>
+
+                <h4>
+                    @Model.MyDebt VNĐ
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h6>
+                    Thông báo
+                </h6>
+
+                <h4>
+                    @Model.TotalNotifications
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<hr />
+
+<h3>🔥 Dịch vụ được đánh giá cao</h3>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Dịch vụ</th>
+        <th>Điểm trung bình</th>
+        <th>Lượt đánh giá</th>
+    </tr>
+
+    @if (ViewBag.TopServices != null)
+    {
+        foreach (var item in ViewBag.TopServices)
+        {
+            <tr>
+
+                <td>
+                    @item.ServiceName
+                </td>
+
+                <td>
+                    ⭐ @item.AverageRating.ToString("0.0")
+                </td>
+
+                <td>
+                    @item.TotalReviews
+                </td>
+
+            </tr>
+        }
+    }
+
+</table>
+

@@ -1,0 +1,102 @@
+﻿@model HTQL_DU_LICH.ViewModels.MyTripsViewModel
+
+<h2>Nhóm du lịch của tôi</h2>
+
+<a asp-action="Create"
+   class="btn btn-success mb-3">
+    Tạo chuyến đi mới
+</a>
+
+<hr />
+
+<h3>📌 Nhóm tôi tạo</h3>
+
+@if (Model.CreatedTrips.Any())
+{
+    @foreach (var trip in Model.CreatedTrips)
+    {
+        <div class="card mb-3 p-3">
+
+            <h5>@trip.Title</h5>
+
+            <p>
+                📍 @trip.Destination
+            </p>
+
+            <a asp-action="Details"
+               asp-route-id="@trip.Id"
+               class="btn btn-primary">
+                Chi tiết
+            </a>
+
+        </div>
+    }
+}
+else
+{
+    <p>Chưa tạo nhóm nào.</p>
+}
+
+<hr />
+
+<h3>📌 Nhóm tôi tham gia</h3>
+
+@if (Model.JoinedTrips.Any())
+{
+    @foreach (var trip in Model.JoinedTrips)
+    {
+        <div class="card mb-3 p-3">
+
+            <h5>@trip.Title</h5>
+
+            <p>
+                📍 @trip.Destination
+            </p>
+
+            <a asp-action="Details"
+               asp-route-id="@trip.Id"
+               class="btn btn-info">
+                Chi tiết
+            </a>
+
+            <a asp-action="Leave"
+               asp-route-id="@trip.Id"
+               class="btn btn-warning">
+                Rời nhóm
+            </a>
+
+        </div>
+    }
+}
+else
+{
+    <p>Chưa tham gia nhóm nào.</p>
+}
+
+<hr />
+
+<h3>📌 Nhóm đang chờ duyệt</h3>
+
+@if (Model.PendingTrips.Any())
+{
+    @foreach (var trip in Model.PendingTrips)
+    {
+        <div class="card mb-3 p-3">
+
+            <h5>@trip.Title</h5>
+
+            <p>
+                📍 @trip.Destination
+            </p>
+
+            <span class="badge bg-warning">
+                Đang chờ duyệt
+            </span>
+
+        </div>
+    }
+}
+else
+{
+    <p>Không có yêu cầu nào đang chờ.</p>
+}
