@@ -1,69 +1,140 @@
 ﻿@model HTQL_DU_LICH.Models.Service
 
-<h2>Sửa dịch vụ</h2>
+@{
+    ViewData["Title"] = "Sửa dịch vụ";
+}
 
-<form method="post">
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
 
-    <input type="hidden"
-           asp-for="Id" />
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">
+                    Sửa dịch vụ
+                </h2>
 
-    <input type="hidden"
-           asp-for="VendorId" />
+                <p class="text-muted">
+                    Cập nhật thông tin dịch vụ
+                </p>
+            </div>
 
-    <div class="mb-2">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
 
-        <label>Tên</label>
+                    <form method="post">
 
-        <input asp-for="Name"
-               class="form-control" />
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
 
+                        <input type="hidden"
+                               asp-for="Id" />
+
+                        <input type="hidden"
+                               asp-for="VendorId" />
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Tên dịch vụ
+                            </label>
+
+                            <input asp-for="Name"
+                                   class="form-control" />
+
+                            <span asp-validation-for="Name"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Loại dịch vụ
+                            </label>
+
+                            <input asp-for="ServiceType"
+                                   class="form-control" />
+
+                            <span asp-validation-for="ServiceType"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Mô tả
+                            </label>
+
+                            <textarea asp-for="Description"
+                                      class="form-control"
+                                      rows="3"></textarea>
+
+                            <span asp-validation-for="Description"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Giá
+                            </label>
+
+                            <input asp-for="Price"
+                                   class="form-control" />
+
+                            <span asp-validation-for="Price"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="form-check mb-3">
+
+                            <input asp-for="IsActive"
+                                   class="form-check-input" />
+
+                            <label class="form-check-label">
+                                Đang hoạt động
+                            </label>
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100 py-2 mt-2">
+
+                            Cập nhật dịch vụ
+
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+
+                <a asp-action="Index"
+                   class="text-muted text-decoration-none">
+
+                    ← Quay lại danh sách
+
+                </a>
+
+            </div>
+
+        </div>
     </div>
+</div>
 
-    <div class="mb-2">
-
-        <label>Loại</label>
-
-        <input asp-for="ServiceType"
-               class="form-control" />
-
-    </div>
-
-    <div class="mb-2">
-
-        <label>Mô tả</label>
-
-        <textarea asp-for="Description"
-                  class="form-control"></textarea>
-
-    </div>
-
-    <div class="mb-2">
-
-        <label>Giá</label>
-
-        <input asp-for="Price"
-               class="form-control" />
-
-    </div>
-
-    <div class="form-check mb-3">
-
-        <input asp-for="IsActive"
-               class="form-check-input" />
-
-        <label asp-for="IsActive"
-               class="form-check-label">
-
-            Đang hoạt động
-
-        </label>
-
-    </div>
-
-    <button class="btn btn-primary">
-
-        Cập nhật
-
-    </button>
-
-</form>
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

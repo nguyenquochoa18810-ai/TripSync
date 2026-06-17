@@ -158,6 +158,7 @@ namespace HTQL_DU_LICH.Controllers
             ViewBag.Expenses = _context.Expenses
                 .Where(x => x.TripGroupId == id)
                 .ToList();
+
             ViewBag.TotalExpense =
                 _context.Expenses
                 .Where(x => x.TripGroupId == id)
@@ -642,6 +643,22 @@ namespace HTQL_DU_LICH.Controllers
 
                 if (service != null)
                 {
+                    bool serviceExists =
+                        _context.TripServices.Any(x =>
+                            x.TripGroupId == request.TripGroupId &&
+                            x.ServiceId == service.Id);
+
+                    if (!serviceExists)
+                    {
+                        _context.TripServices.Add(
+                            new TripService
+                            {
+                                TripGroupId = request.TripGroupId,
+                                ServiceId = service.Id,
+                                AppliedByUserId = request.CreatedByUserId,
+                                AppliedAt = DateTime.Now
+                            });
+                    }
                     _context.Bookings.Add(
                     new Booking
                     {
@@ -655,29 +672,123 @@ namespace HTQL_DU_LICH.Controllers
 
                         Status = "Pending"
                     });
-                    _context.Expenses.Add(
-                        new Expense
+                    var expense = new Expense
+                    {
+                        TripGroupId = request.TripGroupId,
+
+                        Title = service.Name,
+
+                        Amount = service.Price,
+
+                        PaidByUserId = request.CreatedByUserId,
+
+                        IsApproved = true,
+
+                        ApprovedAt = DateTime.Now,
+
+                        CreatedAt = DateTime.Now
+                    };
+
+                    _context.Expenses.Add(expense);
+                                    
+
+                    
+                    await _context.SaveChangesAsync();
+
+                    var members =
+                        _context.TripMembers
+                        .Where(x =>
+                            x.TripGroupId ==
+                            request.TripGroupId)
+                        .ToList();
+
+                    decimal splitAmount =
+                        service.Price /
+                        members.Count;
+
+                    foreach (var member in members)
+                    {
+                        _context.ExpenseSplits.Add(
+                            new ExpenseSplit
+                            {
+                                ExpenseId = expense.Id,
+
+                                UserId = member.UserId,
+
+                                Amount = splitAmount,
+
+                                IsPaid = false
+                            });
+                    }
+
+                    foreach (var member in members)
+                    {
+                        if (member.UserId != request.CreatedByUserId)
                         {
-                            TripGroupId =
-                                request.TripGroupId,
+                            _context.ExpenseApprovals.Add(
+                                new ExpenseApproval
+                                {
+                                    ExpenseId = expense.Id,
 
-                            Title =
-                                service.Name,
+                                    UserId = member.UserId,
 
-                            Amount =
-                                service.Price,
+                                    IsApproved = true,
 
-                            PaidByUserId =
-                                request.CreatedByUserId,
+                                    ApprovedAt = DateTime.Now
+                                });
+                        }
+                    }
 
-                            IsApproved = true,
+                    var creator =
+                        _context.Users
+                        .FirstOrDefault(x =>
+                            x.Id == request.CreatedByUserId);
 
-                            ApprovedAt =
-                                DateTime.Now
-                        });
+                    string creatorName =
+                        creator == null
+                            ? "Thành viên"
+                            : string.IsNullOrEmpty(creator.FullName)
+                                ? creator.Email
+                                : creator.FullName;
 
-                    request.Status =
-                        "Approved";
+                    foreach (var member in members)
+                    {
+                        if (member.UserId != request.CreatedByUserId)
+                        {
+                            _context.Notifications.Add(
+                                new Notification
+                                {
+                                    UserId = member.UserId,
+
+                                    Title = "Chi phí mới",
+
+                                    Content =
+                                        $"{creatorName} vừa thêm khoản chi '{service.Name}'",
+
+                                    IsRead = false,
+
+                                    CreatedAt = DateTime.Now
+                                });
+                        }
+                    }
+                    request.Status = "Approved";
+
+                    foreach (var member in members)
+                    {
+                        if (member.UserId != request.CreatedByUserId)
+                        {
+                            _context.Notifications.Add(
+                                new Notification
+                                {
+                                    UserId = member.UserId,
+                                    Title = "Chi phí mới",
+                                    Content =
+                                        $"{creatorName} vừa thêm khoản chi '{service.Name}'",
+                                    IsRead = false,
+                                    CreatedAt = DateTime.Now
+                                });
+                        }
+                    }
 
                     await _context.SaveChangesAsync();
                 }

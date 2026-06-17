@@ -1,64 +1,111 @@
 ﻿@model HTQL_DU_LICH.ViewModels.CreateTripViewModel
 
-<h2>Tạo chuyến đi mới</h2>
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Tạo chuyến đi";
+}
 
-<form method="post">
-    <div>
-        <label>Tên chuyến đi</label>
-        <input asp-for="Title" />
-    </div>
-    <br />
+<div class="container mt-4">
 
-    <div>
-        <label>Điểm đến</label>
-        <input asp-for="Destination" />
-    </div>
-    <br />
+    <div class="row justify-content-center">
 
-    <div>
-        <label>Ngày khởi hành</label>
-        <input asp-for="StartDate" type="date" />
-    </div>
-    <br />
+        <div class="col-md-9 col-lg-7">
 
-    <div>
-        <label>Ngày kết thúc</label>
-        <input asp-for="EndDate" type="date" />
-    </div>
-    <br />
+            <div class="card shadow-sm border-0">
 
-    <div>
-        <label>Ngân sách</label>
-        <input asp-for="Budget" />
-    </div>
-    <br />
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Tạo chuyến đi mới</h4>
+                </div>
 
-    <div>
-        <label>Mô tả</label>
-        <textarea asp-for="Description"></textarea>
-    </div>
-    <br />
+                <div class="card-body">
 
-    <!-- ========================================== -->
-    <!-- ĐOẠN CODE SỞ THÍCH NHÓM ĐƯỢC THÊM VÀO ĐÂY -->
-    <!-- ========================================== -->
-    <div class="mb-3">
-        <label>Sở thích nhóm</label>
+                    <form method="post">
 
-        @foreach (var interest in ViewBag.Interests)
-        {
-            <div>
-                <input type="checkbox"
-                       name="SelectedInterests"
-                       value="@interest.Id" />
+                        <div class="mb-3">
+                            <label class="form-label">Tên chuyến đi</label>
+                            <input asp-for="Title" class="form-control" />
+                        </div>
 
-                @interest.Name
+                        <div class="mb-3">
+                            <label class="form-label">Điểm đến</label>
+                            <input asp-for="Destination" class="form-control" />
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ngày khởi hành</label>
+                                <input asp-for="StartDate" type="date" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ngày kết thúc</label>
+                                <input asp-for="EndDate" type="date" class="form-control" />
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ngân sách</label>
+                            <input asp-for="Budget" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <!-- INTERESTS -->
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+                                Sở thích nhóm
+                            </label>
+
+                            <div class="row">
+
+                                @foreach (var interest in ViewBag.Interests)
+                                {
+                                    <div class="col-md-6">
+
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   name="SelectedInterests"
+                                                   value="@interest.Id" />
+
+                                            <label class="form-check-label">
+                                                @interest.Name
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                ← Quay lại
+                            </a>
+
+                            <button type="submit" class="btn btn-success px-4">
+                                Tạo chuyến đi
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
             </div>
-        }
-    </div>
-    <br />
 
-    <button type="submit">
-        Tạo chuyến đi
-    </button>
-</form>
+        </div>
+
+    </div>
+
+</div>

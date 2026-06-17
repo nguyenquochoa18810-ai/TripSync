@@ -76,33 +76,69 @@ namespace HTQL_DU_LICH.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            var vendor =
+                _context.Vendors
+                .FirstOrDefault(x =>
+                    x.UserId == user!.Id);
+
+            if (vendor == null)
+                return Content("Không tìm thấy Vendor");
+
             var service =
                 _context.Services
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefault(x =>
+                    x.Id == id &&
+                    x.VendorId == vendor.Id);
+
+            if (service == null)
+                return NotFound();
 
             return View(service);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Service model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            var vendor =
+                _context.Vendors
+                .FirstOrDefault(x =>
+                    x.UserId == user!.Id);
+
+            if (vendor == null)
+                return Content("Không tìm thấy Vendor");
+
             var service =
-    _context.Services
-    .FirstOrDefault(x =>
-        x.Id == model.Id);
+                _context.Services
+                .FirstOrDefault(x =>
+                    x.Id == model.Id &&
+                    x.VendorId == vendor.Id);
 
             if (service == null)
                 return NotFound();
 
-            service.Name = model.Name;
+            service.Name =
+                model.Name?.Trim() ?? "";
 
             service.ServiceType =
-                model.ServiceType;
+                model.ServiceType?.Trim() ?? "";
 
             service.Description =
-                model.Description;
+                model.Description?.Trim() ?? "";
 
             service.Price =
                 model.Price;
@@ -112,7 +148,8 @@ namespace HTQL_DU_LICH.Controllers
 
             await _context.SaveChangesAsync();
 
-            
+            TempData["Success"] =
+                "Cập nhật dịch vụ thành công";
 
             return RedirectToAction(nameof(Index));
         }

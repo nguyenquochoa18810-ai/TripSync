@@ -53,9 +53,32 @@ namespace HTQL_DU_LICH.Controllers
                 : _context.Services
                     .FirstOrDefault(x => x.Id == latestBooking.ServiceId);
 
-            var myDebt = _context.ExpenseSplits
-                .Where(x => x.UserId == user!.Id && !x.IsPaid)
-                .Sum(x => x.Amount);
+            var tripIds =
+    _context.TripMembers
+    .Where(x => x.UserId == user.Id)
+    .Select(x => x.TripGroupId)
+    .ToList();
+
+            var myDebt =
+            (
+                from split in _context.ExpenseSplits
+
+                join expense in _context.Expenses
+                    on split.ExpenseId equals expense.Id
+
+                where split.UserId == user.Id
+
+                    && expense.PaidByUserId != user.Id
+
+                    && expense.IsApproved
+
+                    && !split.IsPaid
+
+                    && tripIds.Contains(expense.TripGroupId)
+
+                select split.Amount
+
+            ).Sum();
 
             var topServices =
 (

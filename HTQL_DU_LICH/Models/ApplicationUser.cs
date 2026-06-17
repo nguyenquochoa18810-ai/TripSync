@@ -18,5 +18,7 @@ namespace HTQL_DU_LICH.Models
         public DateTime? DateOfBirth { get; set; }
 
         public string? Address { get; set; }
+
+        public bool IsProfileCompleted { get; set; } = false;
     }
 }

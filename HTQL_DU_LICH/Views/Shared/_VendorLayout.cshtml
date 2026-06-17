@@ -1,15 +1,16 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <title>TripSync Vendor</title>
 
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
 
     <style>
             body {
                 background: #f5f7fb;
+                font-family: system-ui, sans-serif;
             }
 
             .sidebar {
@@ -18,102 +19,118 @@
                 position: fixed;
                 left: 0;
                 top: 0;
+                background: linear-gradient(180deg, #0d6efd, #0b5ed7);
+                color: white;
             }
 
             .main-content {
                 margin-left: 260px;
                 width: calc(100% - 260px);
             }
+
+            .menu-item {
+                display: block;
+                padding: 10px 14px;
+                margin: 4px 10px;
+                border-radius: 10px;
+                color: #fff;
+                text-decoration: none;
+                transition: 0.2s;
+                font-weight: 500;
+            }
+
+                .menu-item:hover {
+                    background: rgba(255,255,255,0.15);
+                }
+
+                .menu-item.active {
+                    background: white;
+                    color: #0d6efd;
+                }
+
+            .sidebar-title {
+                font-weight: 800;
+                font-size: 20px;
+            }
     </style>
 </head>
+
 <body>
 
     <div class="d-flex">
 
-        <div class="sidebar bg-primary text-white p-3">
+        <!-- SIDEBAR -->
+        <div class="sidebar p-3">
 
-            <h3>Vendor Panel</h3>
+            <div class="p-2 mb-3">
+                <div class="sidebar-title">🏪 Vendor Panel</div>
+                <small class="text-white-50">TripSync Business</small>
+            </div>
 
-            <hr />
+            <hr class="text-white-50" />
 
-            <ul class="nav flex-column">
+            <a asp-controller="VendorDashboard" asp-action="Index"
+               class="menu-item">
+                📊 Dashboard
+            </a>
 
-                <li class="nav-item">
-                    <a class="nav-link text-white"
-                       asp-controller="VendorDashboard"
-                       asp-action="Index">
+            <a asp-controller="VendorService" asp-action="Index"
+               class="menu-item">
+                🧳 Quản lý dịch vụ
+            </a>
 
-                        Dashboard
+            <a asp-controller="VendorBooking" asp-action="Index"
+               class="menu-item">
+                📦 Quản lý Booking
+            </a>
 
-                    </a>
-                </li>
+            <a asp-controller="Review" asp-action="Index"
+               class="menu-item">
+                ⭐ Đánh giá khách hàng
+            </a>
 
-                <li class="nav-item">
-                    <a class="nav-link text-white"
-                       asp-controller="VendorService"
-                       asp-action="Index">
+            <a asp-controller="VendorProfile" asp-action="Index"
+               class="menu-item">
+                🏢 Hồ sơ doanh nghiệp
+            </a>
 
-                        Quản lý dịch vụ
-
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link text-white"
-                       asp-controller="VendorBooking"
-                       asp-action="Index">
-
-                        Quản lý Booking
-
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link text-white"
-                       asp-controller="Review"
-                       asp-action="Index">
-
-                        Đánh giá khách hàng
-
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link text-white"
-                       asp-controller="VendorProfile"
-                       asp-action="Index">
-
-                        Hồ sơ doanh nghiệp
-
-                    </a>
-                </li>
-
-            </ul>
-
-            <hr />
+            <hr class="text-white-50" />
 
             <form asp-area="Identity"
                   asp-page="/Account/Logout"
                   method="post">
 
                 <button type="submit"
-                        class="btn btn-danger w-100">
-
-                    Đăng xuất
-
+                        class="btn btn-light text-danger w-100 fw-semibold">
+                    🚪 Đăng xuất
                 </button>
 
             </form>
 
         </div>
 
+        <!-- CONTENT -->
         <div class="main-content p-4">
+
+            <div class="bg-white shadow-sm rounded-3 p-3 mb-4 d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0 fw-bold text-secondary">
+                    Vendor Dashboard
+                </h5>
+
+                <div class="text-muted">
+                    Xin chào, <strong>@User.Identity?.Name</strong>
+                </div>
+
+            </div>
 
             @RenderBody()
 
         </div>
 
     </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
 </html>

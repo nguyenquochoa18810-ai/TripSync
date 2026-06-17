@@ -1,51 +1,101 @@
 ﻿@model HTQL_DU_LICH.ViewModels.VendorRegisterViewModel
 
-<h2>Đăng ký Nhà Cung Cấp</h2>
+@{
+    ViewData["Title"] = "Đăng ký Nhà Cung Cấp";
+}
 
-<form method="post">
-
-    <div>
-        <label>Tên doanh nghiệp</label>
-        <input asp-for="CompanyName" class="form-control" />
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">
+                    Đăng ký Nhà Cung Cấp
+                </h2>
+                <p class="text-muted">
+                    Tham gia hệ thống để quản lý dịch vụ và khách hàng dễ dàng hơn
+                </p>
+            </div>
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="CompanyName"
+                                   class="form-label">
+                                Tên doanh nghiệp
+                            </label>
+                            <input asp-for="CompanyName"
+                                   class="form-control" />
+                            <span asp-validation-for="CompanyName"
+                                  class="text-danger">
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description"
+                                   class="form-label">
+                                Mô tả
+                            </label>
+                            <textarea asp-for="Description"
+                                      class="form-control"
+                                      rows="3"></textarea>
+                            <span asp-validation-for="Description"
+                                  class="text-danger">
+                            </span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone"
+                                       class="form-label">
+                                    Số điện thoại
+                                </label>
+                                <input asp-for="Phone"
+                                       class="form-control" />
+                                <span asp-validation-for="Phone"
+                                      class="text-danger">
+                                </span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email"
+                                       class="form-label">
+                                    Email
+                                </label>
+                                <input asp-for="Email"
+                                       class="form-control" />
+                                <span asp-validation-for="Email"
+                                      class="text-danger">
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Address"
+                                   class="form-label">
+                                Địa chỉ
+                            </label>
+                            <input asp-for="Address"
+                                   class="form-control" />
+                            <span asp-validation-for="Address"
+                                  class="text-danger">
+                            </span>
+                        </div>
+                        <button type="submit"
+                                class="btn btn-success w-100 py-2 mt-3">
+                            Đăng ký nhà cung cấp
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3 text-muted">
+                Bằng việc đăng ký, bạn đồng ý với điều khoản sử dụng của hệ thống.
+            </div>
+        </div>
     </div>
+</div>
 
-    <br />
-
-    <div>
-        <label>Mô tả</label>
-        <textarea asp-for="Description"
-                  class="form-control"></textarea>
-    </div>
-
-    <br />
-
-    <div>
-        <label>Số điện thoại</label>
-        <input asp-for="Phone"
-               class="form-control" />
-    </div>
-
-    <br />
-
-    <div>
-        <label>Email</label>
-        <input asp-for="Email"
-               class="form-control" />
-    </div>
-
-    <br />
-
-    <div>
-        <label>Địa chỉ</label>
-        <input asp-for="Address"
-               class="form-control" />
-    </div>
-
-    <br />
-
-    <button type="submit"
-            class="btn btn-success">
-        Đăng ký nhà cung cấp
-    </button>
-
-</form>
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

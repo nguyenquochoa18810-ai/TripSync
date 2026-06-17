@@ -68,5 +68,8 @@ namespace HTQL_DU_LICH.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        
+
     }
 }

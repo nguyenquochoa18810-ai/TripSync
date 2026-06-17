@@ -1,74 +1,225 @@
 ﻿@model HTQL_DU_LICH.ViewModels.ExpenseSummaryViewModel
 
-<h2>Tổng quan tài chính</h2>
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Tổng quan tài chính";
+}
 
-<div class="alert alert-info">
-    <h4>💰 Tổng chi phí các chuyến đi</h4>
+<div class="container-fluid">
 
-    <strong>
-        @Model.TotalExpense.ToString("N0") VNĐ
-    </strong>
-</div>
+    <div class="mb-4">
 
-<div class="alert alert-warning">
-    <h4>📌 Số tiền bạn cần thanh toán</h4>
+        <h2 class="fw-bold">
+            📊 Tổng quan tài chính
+        </h2>
 
-    <strong>
-        @Model.YouOwe.ToString("N0") VNĐ
-    </strong>
-</div>
+        <p class="text-muted">
+            Theo dõi toàn bộ chi phí và công nợ của các chuyến đi
+        </p>
 
-<div class="alert alert-success">
-    <h4>📌 Số tiền thành viên khác cần thanh toán cho bạn</h4>
+    </div>
 
-    <strong>
-        @Model.YouAreOwed.ToString("N0") VNĐ
-    </strong>
-</div>
+    <div class="row g-4 mb-4">
 
+        <div class="col-md-4">
 
+            <div class="card dashboard-card shadow border-0">
 
-<hr />
+                <div class="card-body">
 
-<h4>Chi tiết cách tính</h4>
+                    <div class="d-flex justify-content-between">
 
-<table class="table table-bordered">
+                        <div>
 
-    <tr>
-        <th>Khoản chi</th>
-        <th>Người trả</th>
-        <th>Tổng tiền</th>
-        <th>Số thành viên</th>
-        <th>Phần của bạn</th>
-    </tr>
+                            <small class="text-muted">
+                                Tổng chi phí
+                            </small>
 
-    @foreach (var item in Model.DebtDetails)
-    {
-        <tr>
-            <td>@item.ExpenseTitle</td>
+                            <h3 class="fw-bold text-primary mt-2">
+                                @Model.TotalExpense.ToString("N0") VNĐ
+                            </h3>
 
-            <td>@item.PaidBy</td>
+                        </div>
 
-            <td>
-                @item.ExpenseAmount.ToString("N0") VNĐ
-            </td>
+                        <div class="icon-box bg-primary">
+                            💰
+                        </div>
 
-            <td>@item.MemberCount</td>
+                    </div>
 
-            <td>
-                @item.YourShare.ToString("N0") VNĐ
-            </td>
-        </tr>
-    }
+                </div>
 
-</table>
+            </div>
 
-<div class="alert alert-info">
+        </div>
 
-    <b>Cách tính:</b>
+        <div class="col-md-4">
 
-    <br />
+            <div class="card dashboard-card shadow border-0">
 
-    Phần phải trả = Tổng chi phí ÷ Số thành viên.
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <small class="text-muted">
+                                Bạn cần thanh toán
+                            </small>
+
+                            <h3 class="fw-bold text-danger mt-2">
+                                @Model.YouOwe.ToString("N0") VNĐ
+                            </h3>
+
+                        </div>
+
+                        <div class="icon-box bg-danger">
+                            💳
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card dashboard-card shadow border-0">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <small class="text-muted">
+                                Người khác nợ bạn
+                            </small>
+
+                            <h3 class="fw-bold text-success mt-2">
+                                @Model.YouAreOwed.ToString("N0") VNĐ
+                            </h3>
+
+                        </div>
+
+                        <div class="icon-box bg-success">
+                            📈
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                📋 Chi tiết phân chia chi phí
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Khoản chi</th>
+                            <th>Người trả</th>
+                            <th>Tổng tiền</th>
+                            <th>Số thành viên</th>
+                            <th>Phần của bạn</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model.DebtDetails)
+                        {
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        @item.ExpenseTitle
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @item.PaidBy
+                                </td>
+
+                                <td class="fw-bold text-danger">
+                                    @item.ExpenseAmount.ToString("N0") VNĐ
+                                </td>
+
+                                <td>
+                                    @item.MemberCount người
+                                </td>
+
+                                <td class="fw-bold text-primary">
+                                    @item.YourShare.ToString("N0") VNĐ
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card mt-4 border-0 shadow">
+
+        <div class="card-header bg-info text-white">
+
+            <h5 class="mb-0">
+                ℹ Cách tính công nợ
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <p class="mb-0">
+
+                <strong>
+                    Công thức:
+                </strong>
+
+                <br />
+
+                Phần phải trả = Tổng chi phí ÷ Số thành viên tham gia.
+
+                <br /><br />
+
+                Nếu một thành viên đã thanh toán toàn bộ khoản chi,
+                hệ thống sẽ tự động tính số tiền những thành viên khác
+                cần hoàn trả cho người đó.
+
+            </p>
+
+        </div>
+
+    </div>
 
 </div>

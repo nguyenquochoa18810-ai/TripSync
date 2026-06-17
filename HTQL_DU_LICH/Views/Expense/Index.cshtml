@@ -1,124 +1,200 @@
 ﻿@model List<HTQL_DU_LICH.ViewModels.ExpenseListViewModel>
 
-<h2>Danh sách chi phí</h2>
+@{
+    ViewData["Title"] = "Quản lý chi phí";
+}
 
-<table class="table table-bordered">
+<div class="container-fluid">
 
-    <tr>
-        <th>Nhóm</th>
-        <th>Tiêu đề</th>
-        <th>Số tiền</th>
-        <th>Người trả</th>
-        <th>Trạng thái</th>
-        <th>Chi tiết</th>
-        <th>Tiến độ</th>
-    </tr>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>@item.TripName</td>
+        <h2 class="fw-bold">
+            💰 Quản lý chi phí
+        </h2>
 
-            <td>@item.Title</td>
+        <div>
 
-            <td>
-                @item.Amount.ToString("N0") VNĐ
-            </td>
+            <a asp-action="Summary"
+               class="btn btn-primary">
 
-            <td>@item.PaidBy</td>
+                📊 Tổng quan tài chính
 
-            <td>
+            </a>
 
-                @if (item.IsApproved)
-                {
-                    <span class="badge bg-success">
-                        Đã xác nhận
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-warning">
-                        Chờ xác nhận
-                    </span>
+            <a asp-action="Debts"
+               class="btn btn-warning">
 
-                    @if (item.CanApprove)
-                    {
-                        <br />
-                        <br />
+                💳 Công nợ
 
-                        <form asp-controller="Expense"
-                        asp-action="ApproveExpense"
-                        method="post">
+            </a>
 
-                            <input type="hidden"
-                            name="expenseId"
-                            value="@item.Id" />
+            <a asp-action="Transactions"
+               class="btn btn-info text-white">
 
-                            <button class="btn btn-success btn-sm">
-                                Xác nhận
-                            </button>
+                📜 Lịch sử giao dịch
 
-                        </form>
+            </a>
 
-                        <br />
+        </div>
 
-                        <form asp-controller="Expense"
-                        asp-action="RejectExpense"
-                        method="post">
+    </div>
 
-                            <input type="hidden"
-                            name="expenseId"
-                            value="@item.Id" />
+    <div class="card shadow border-0">
 
-                            <button class="btn btn-danger btn-sm">
-                                Từ chối
-                            </button>
+        <div class="card-header bg-primary text-white">
 
-                        </form>
+            <h5 class="mb-0">
+                Danh sách chi phí
+            </h5>
 
-                    }
-                }
+        </div>
 
-                    
+        <div class="card-body">
 
-            </td>
+            <div class="table-responsive">
 
-            <td>
+                <table class="table table-hover align-middle">
 
-                <a asp-controller="Expense"
-                   asp-action="ExpenseDetails"
-                   asp-route-id="@item.Id"
-                   class="btn btn-info btn-sm">
+                    <thead class="table-dark">
 
-                    Xem chi tiết
+                        <tr>
+                            <th>Nhóm</th>
+                            <th>Tiêu đề</th>
+                            <th>Số tiền</th>
+                            <th>Người trả</th>
+                            <th>Trạng thái</th>
+                            <th>Tiến độ</th>
+                            <th width="220">Hành động</th>
+                        </tr>
 
-                </a>
+                    </thead>
 
-            </td>
+                    <tbody>
 
-            <td>
-                @item.ApprovedCount /
-                @item.TotalApprovals
-            </td>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
 
-        </tr>
-    }
+                                <td>
+                                    <strong>@item.TripName</strong>
+                                </td>
 
-</table>
+                                <td>
+                                    @item.Title
+                                </td>
 
-<br />
+                                <td class="fw-bold text-danger">
+                                    @item.Amount.ToString("N0") VNĐ
+                                </td>
 
-<a asp-action="Summary"
-   class="btn btn-primary">
-    Tổng quan tài chính
-</a>
+                                <td>
+                                    @item.PaidBy
+                                </td>
 
-<a asp-action="Debts"
-   class="btn btn-warning">
-    Công nợ
-</a>
+                                <td>
 
-<a asp-action="Transactions"
-   class="btn btn-info">
-    Lịch sử giao dịch
-</a>
+                                    @if (item.IsApproved)
+                                    {
+                                        <span class="badge bg-success">
+                                            ✔ Đã xác nhận
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Chờ xác nhận
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @{
+                                        double percent = 0;
+
+                                        if (item.TotalApprovals > 0)
+                                        {
+                                            percent =
+                                            (double)item.ApprovedCount
+                                            / item.TotalApprovals * 100;
+                                        }
+                                    }
+
+                                    <div class="progress">
+
+                                        <div class="progress-bar bg-success"
+                                             style="width:@percent%">
+
+                                            @item.ApprovedCount/@item.TotalApprovals
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    <a asp-controller="Expense"
+                                       asp-action="ExpenseDetails"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-info btn-sm text-white">
+
+                                        🔍 Chi tiết
+
+                                    </a>
+
+                                    @if (!item.IsApproved && item.CanApprove)
+                                    {
+                                        <form asp-controller="Expense"
+                                              asp-action="ApproveExpense"
+                                              method="post"
+                                              class="d-inline">
+
+                                            <input type="hidden"
+                                                   name="expenseId"
+                                                   value="@item.Id" />
+
+                                            <button class="btn btn-success btn-sm">
+
+                                                ✔
+
+                                            </button>
+
+                                        </form>
+
+                                        <form asp-controller="Expense"
+                                              asp-action="RejectExpense"
+                                              method="post"
+                                              class="d-inline">
+
+                                            <input type="hidden"
+                                                   name="expenseId"
+                                                   value="@item.Id" />
+
+                                            <button class="btn btn-danger btn-sm">
+
+                                                ✖
+
+                                            </button>
+
+                                        </form>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
