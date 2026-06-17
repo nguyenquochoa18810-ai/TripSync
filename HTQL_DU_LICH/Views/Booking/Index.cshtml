@@ -1,61 +1,116 @@
-﻿
-@model IEnumerable<HTQL_DU_LICH.Models.Booking>
+﻿@model IEnumerable<HTQL_DU_LICH.Models.Booking>
+@using HTQL_DU_LICH.Models
 
-<h2>Danh sách đặt chỗ</h2>
+@{
+    ViewData["Title"] = "Quản lý Booking";
+}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>User</th>
-            <th>Service</th>
-            <th>Ngày đặt</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @{
-                        var trip =
-                            ((List<TripGroup>)ViewBag.Trips)
-                            .FirstOrDefault(x =>
-                                x.Id == item.TripGroupId);
-                    }
-
-                    @(trip?.Title)
-                </td>
-
-                <td>
-                    @{
-                        var service =
-                            ((List<Service>)ViewBag.Services)
-                            .FirstOrDefault(x =>
-                                x.Id == item.ServiceId);
-                    }
-
-                    @(service?.Name)
-                </td>
-                <td>@item.BookingDate</td>
-                <td>@item.Status</td>
-                <td>
-                    @if (item.Status == "Pending")
-                    {
-                        <a asp-action="Confirm" asp-route-id="@item.Id" class="btn btn-success">
-                            Xác nhận
-                        </a>
-                    }
-
-                    @if (item.Status == "Confirmed")
-                    {
-                        <a asp-action="Complete" asp-route-id="@item.Id" class="btn btn-primary">
-                            Hoàn thành
-                        </a>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="container-fluid">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    📅 Quản lý Booking
+                </h3>
+                <span class="badge bg-light text-dark fs-6">
+                    Tổng: @Model.Count()
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Nhóm du lịch</th>
+                            <th>Dịch vụ</th>
+                            <th>Ngày đặt</th>
+                            <th>Trạng thái</th>
+                            <th width="180">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int stt = 1;
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@stt</td>
+                                <td>
+                                    @{
+                                        var trip =
+                                        ((List<TripGroup>)ViewBag.Trips)
+                                        .FirstOrDefault(x =>
+                                        x.Id == item.TripGroupId);
+                                    }
+                                    <strong>
+                                        @(trip?.Title ?? "Không xác định")
+                                    </strong>
+                                </td>
+                                <td>
+                                    @{
+                                        var service =
+                                        ((List<Service>)ViewBag.Services)
+                                        .FirstOrDefault(x =>
+                                        x.Id == item.ServiceId);
+                                    }
+                                    @(service?.Name ?? "Không xác định")
+                                </td>
+                                <td>
+                                    @item.BookingDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Chờ xác nhận
+                                        </span>
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        <span class="badge bg-success">
+                                            ✔ Đã xác nhận
+                                        </span>
+                                    }
+                                    else if (item.Status == "Completed")
+                                    {
+                                        <span class="badge bg-primary">
+                                            🎉 Hoàn thành
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            @item.Status
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <a asp-action="Confirm"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-success btn-sm">
+                                            ✔ Xác nhận
+                                        </a>
+                                    }
+                                    @if (item.Status == "Confirmed")
+                                    {
+                                        <a asp-action="Complete"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-primary btn-sm">
+                                            🎉 Hoàn thành
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                            stt++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

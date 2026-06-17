@@ -135,6 +135,7 @@ C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\HTQL_DU_LICH.M
 C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\HTQL_DU_LICH.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\HTQL_DU_LICH.RazorAssemblyInfo.cache
 C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\HTQL_DU_LICH.RazorAssemblyInfo.cs
+C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\HTQL_DU_LICH.sourcelink.json
 C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\rjimswa.dswa.cache.json
 C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
 C:\Users\admin\Desktop\HTQL_DU_LICH\HTQL_DU_LICH\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json

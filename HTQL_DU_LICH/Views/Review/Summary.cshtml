@@ -1,49 +1,119 @@
 ﻿@model HTQL_DU_LICH.ViewModels.ServiceReviewSummaryViewModel
 
-<h2>@Model.ServiceName</h2>
+@{
+    ViewData["Title"] = "Thống kê đánh giá dịch vụ";
+}
 
-<div class="alert alert-info">
-
-    <h4>
-        ⭐ Trung bình:
-        @Model.AverageRating.ToString("0.0")
-    </h4>
-
+<div class="container-fluid">
+    <div class="mb-4">
+        <h2 class="fw-bold">
+            ⭐ @Model.ServiceName
+        </h2>
+        <p class="text-muted">
+            Thống kê tổng quan đánh giá của khách hàng
+        </p>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="display-3 text-warning">
+                        ⭐
+                    </div>
+                    <h5 class="text-muted">
+                        Điểm trung bình
+                    </h5>
+                    <h1 class="fw-bold text-warning">
+                        @Model.AverageRating.ToString("0.0")
+                    </h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="display-3 text-success">
+                        💬
+                    </div>
+                    <h5 class="text-muted">
+                        Tổng lượt đánh giá
+                    </h5>
+                    <h1 class="fw-bold text-success">
+                        @Model.TotalReviews
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                📊 Phân bố đánh giá
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Mức đánh giá</th>
+                            <th>Số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <span class="badge bg-success">
+                                    ⭐⭐⭐⭐⭐ 5 Sao
+                                </span>
+                            </td>
+                            <td>
+                                <strong>@Model.FiveStar</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary">
+                                    ⭐⭐⭐⭐ 4 Sao
+                                </span>
+                            </td>
+                            <td>
+                                <strong>@Model.FourStar</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="badge bg-warning text-dark">
+                                    ⭐⭐⭐ 3 Sao
+                                </span>
+                            </td>
+                            <td>
+                                <strong>@Model.ThreeStar</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    ⭐⭐ 2 Sao
+                                </span>
+                            </td>
+                            <td>
+                                <strong>@Model.TwoStar</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="badge bg-danger">
+                                    ⭐ 1 Sao
+                                </span>
+                            </td>
+                            <td>
+                                <strong>@Model.OneStar</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div class="alert alert-success">
-
-    Tổng lượt đánh giá:
-
-    <b>@Model.TotalReviews</b>
-
-</div>
-
-<table class="table table-bordered">
-
-    <tr>
-        <td>5 sao</td>
-        <td>@Model.FiveStar</td>
-    </tr>
-
-    <tr>
-        <td>4 sao</td>
-        <td>@Model.FourStar</td>
-    </tr>
-
-    <tr>
-        <td>3 sao</td>
-        <td>@Model.ThreeStar</td>
-    </tr>
-
-    <tr>
-        <td>2 sao</td>
-        <td>@Model.TwoStar</td>
-    </tr>
-
-    <tr>
-        <td>1 sao</td>
-        <td>@Model.OneStar</td>
-    </tr>
-
-</table>

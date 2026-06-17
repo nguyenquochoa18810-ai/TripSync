@@ -1,91 +1,305 @@
 ﻿@model HTQL_DU_LICH.Models.Service
 
-<h2>@Model.Name</h2>
+@{
+    ViewData["Title"] = "Chi tiết dịch vụ";
+}
 
-<div class="alert alert-info">
+<div class="container">
 
-    ⭐ Điểm trung bình:
+    <!-- THÔNG TIN DỊCH VỤ -->
 
-    <b>
-        @Convert.ToDouble(
-            ViewBag.AverageRating
-        ).ToString("0.0")
-    </b>
+    <div class="card shadow border-0 mb-4">
 
-    |
+        <div class="card-header bg-primary text-white">
 
-    @ViewBag.TotalReviews đánh giá
+            <h3 class="mb-0">
+                @Model.Name
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-8">
+
+                    <p class="mb-3">
+                        @Model.Description
+                    </p>
+
+                </div>
+
+                <div class="col-md-4 text-end">
+
+                    <h2 class="text-danger fw-bold">
+
+                        @Model.Price.ToString("N0") VNĐ
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- THỐNG KÊ -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Điểm đánh giá
+                    </h6>
+
+                    <h2 class="text-warning">
+
+                        ⭐ @Convert.ToDouble(ViewBag.AverageRating).ToString("0.0")
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Tổng đánh giá
+                    </h6>
+
+                    <h2 class="text-success">
+
+                        @ViewBag.TotalReviews
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Loại dịch vụ
+                    </h6>
+
+                    <h2 class="text-primary">
+
+                        @Model.ServiceType
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CHI TIẾT -->
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+                📋 Thông tin chi tiết
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-borderless">
+
+                <tr>
+                    <th width="200">Tên dịch vụ</th>
+                    <td>@Model.Name</td>
+                </tr>
+
+                <tr>
+                    <th>Loại dịch vụ</th>
+                    <td>@Model.ServiceType</td>
+                </tr>
+
+                <tr>
+                    <th>Giá</th>
+                    <td class="text-danger fw-bold">
+                        @Model.Price.ToString("N0") VNĐ
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Mô tả</th>
+                    <td>@Model.Description</td>
+                </tr>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- REVIEW -->
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-header bg-warning">
+
+            <h5 class="mb-0">
+                ⭐ Đánh giá gần đây
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (ViewBag.Reviews != null)
+            {
+                foreach (var review in ViewBag.Reviews)
+                {
+                    <div class="border-bottom pb-3 mb-3">
+
+                        <h6>
+                            👤 @review.UserId
+                        </h6>
+
+                        <div class="text-warning">
+                            @for (int i = 0; i < review.Rating; i++)
+                            {
+                                <span>⭐</span>
+                            }
+                        </div>
+
+                        <p class="mt-2">
+                            @review.Comment
+                        </p>
+
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-secondary">
+
+                    Chưa có đánh giá nào.
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    <!-- THÊM VÀO CHUYẾN ĐI -->
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-success text-white">
+
+            <h5 class="mb-0">
+                🚀 Thêm dịch vụ vào chuyến đi
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (ViewBag.MyTrips != null)
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th>Tên chuyến đi</th>
+                                <th width="180">Thao tác</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var trip in ViewBag.MyTrips)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @trip.Title
+                                        </strong>
+                                    </td>
+
+                                    <td>
+
+                                        <form asp-action="ApplyToTrip"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="serviceId"
+                                                   value="@Model.Id" />
+
+                                            <input type="hidden"
+                                                   name="tripId"
+                                                   value="@trip.Id" />
+
+                                            <button type="submit"
+                                                    class="btn btn-success">
+
+                                                ➕ Thêm vào chuyến đi
+
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+
+                    Bạn chưa có chuyến đi nào.
+
+                </div>
+            }
+
+        </div>
+
+    </div>
 
 </div>
-
-<table class="table">
-
-    <tr>
-        <th>Loại dịch vụ</th>
-        <td>@Model.ServiceType</td>
-    </tr>
-
-    <tr>
-        <th>Giá</th>
-        <td>
-            @Model.Price.ToString("N0") VNĐ
-        </td>
-    </tr>
-
-    <tr>
-        <th>Mô tả</th>
-        <td>@Model.Description</td>
-    </tr>
-
-</table>
-
-<hr />
-
-<h4>Đánh giá gần đây</h4>
-
-<hr />
-
-<h4>Thêm dịch vụ vào nhóm</h4>
-
-@if (ViewBag.MyTrips != null)
-{
-    <table class="table">
-
-        
-        @foreach (var trip in ViewBag.MyTrips)
-        {
-            <tr>
-
-                <td>
-                    @trip.Title
-                </td>
-
-                <td>
-
-                    <form asp-action="ApplyToTrip"
-                          method="post">
-
-                        <input type="hidden"
-                               name="serviceId"
-                               value="@Model.Id" />
-
-                        <input type="hidden"
-                               name="tripId"
-                               value="@trip.Id" />
-
-                        <button class="btn btn-success">
-
-                            Thêm vào nhóm
-
-                        </button>
-
-                    </form>
-
-                </td>
-
-            </tr>
-        }
-
-    </table>
-
-}

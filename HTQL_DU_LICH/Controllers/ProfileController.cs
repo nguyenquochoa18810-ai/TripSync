@@ -31,10 +31,15 @@ namespace HTQL_DU_LICH.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return RedirectToAction("Login", "Auth");
             }
+
+            ViewBag.IsProfileCompleted =
+                user.IsProfileCompleted;
+
             return View(user);
         }
 
@@ -123,16 +128,23 @@ namespace HTQL_DU_LICH.Controllers
         public async Task<IActionResult> Index(ApplicationUser model)
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return RedirectToAction("Login", "Auth");
             }
-            user.FullName = model.FullName;
-            user.AvatarUrl = model.AvatarUrl;
-            user.Bio = model.Bio;
+
+            user.FullName = model.FullName ?? "";
+            user.Bio = model.Bio ?? "";
+
+            user.IsProfileCompleted = true;
+
             await _userManager.UpdateAsync(user);
-            ViewBag.Success = "Cập nhật thành công";
-            return View(user);
+
+            TempData["Success"] =
+                "Cập nhật thành công";
+
+            return RedirectToAction(nameof(Index));
         }
         [HttpGet]
         public async Task<IActionResult> Interests()

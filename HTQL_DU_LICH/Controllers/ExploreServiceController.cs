@@ -105,6 +105,39 @@ namespace HTQL_DU_LICH.Controllers
 
             await _context.SaveChangesAsync();
 
+            var service =
+    _context.Services
+    .FirstOrDefault(x => x.Id == serviceId);
+
+            var members =
+                _context.TripMembers
+                .Where(x => x.TripGroupId == tripId)
+                .ToList();
+
+            foreach (var member in members)
+            {
+                string content =
+                    member.UserId == user.Id
+                    ? $"Bạn đã đề xuất dịch vụ '{service?.Name}'"
+                    : $"{user.Email} đã đề xuất dịch vụ '{service?.Name}'";
+
+                _context.Notifications.Add(
+                    new Notification
+                    {
+                        UserId = member.UserId,
+
+                        Title = "Yêu cầu dịch vụ mới",
+
+                        Content = content,
+
+                        IsRead = false,
+
+                        CreatedAt = DateTime.Now
+                    });
+            }
+
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(
                 "Details",
                 "Trip",

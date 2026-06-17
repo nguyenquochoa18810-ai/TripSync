@@ -72,21 +72,20 @@ namespace HTQL_DU_LICH.Controllers
 
             return View(bookings);
         }
-        public async Task<IActionResult> Confirm(int id)
+        public IActionResult Confirm(int id)
         {
             var booking =
-                await _context.Bookings.FindAsync(id);
+                _context.Bookings
+                .FirstOrDefault(x => x.Id == id);
 
             if (booking == null)
-                return Content("Booking không tồn tại");
+                return NotFound();
 
-            booking.Status = "Confirmed";
+            booking.Status = "Completed";
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            return Content(
-                $"Booking {booking.Id} đã chuyển thành {booking.Status}"
-            );
+            return RedirectToAction(nameof(Index));
         }
         public async Task<IActionResult>
         Complete(int id)

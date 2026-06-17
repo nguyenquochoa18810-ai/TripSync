@@ -1,103 +1,135 @@
 ﻿@model List<HTQL_DU_LICH.ViewModels.MatchResultViewModel>
 
-<h2>Ghép nhóm du lịch</h2>
+@{
+    ViewData["Title"] = "Ghép nhóm du lịch";
+}
 
-<table class="table table-bordered">
-    <tr>
-        <th>Nhóm</th>
-        <th>Sở thích</th>
-        <th>Độ phù hợp</th>
-        <th>Số thành viên</th>
-        <th>Trạng thái</th>
-        <th>Hành động</th>
-    </tr>
-
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>@item.TripTitle</td>
-
-            <td>
-
-                @foreach (var interest in item.Interests)
-                {
-                    <span class="badge bg-secondary">
-                        @interest
-                    </span>
-                }
-
-            </td>
-
-            <td>
-
-                <strong>
-                    @item.MatchPercent %
-                </strong>
-
-                <br />
-
-                <small>
-                    (@item.CommonInterestCount/@item.TotalTripInterestCount sở thích khớp)
-                </small>
-
-            </td>
-
-            <td>
-                @item.MemberCount người
-            </td>
-
-            <td>
-                @if (item.Status == "Trưởng nhóm")
-                {
-                    <span class="badge bg-success">
-                        Trưởng nhóm
-                    </span>
-                }
-                else if (item.Status == "Đã tham gia")
-                {
-                    <span class="badge bg-primary">
-                        Đã tham gia
-                    </span>
-                }
-                else if (item.Status == "Chờ duyệt")
-                {
-                    <span class="badge bg-warning">
-                        Chờ duyệt
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">
-                        Chưa tham gia
-                    </span>
-                }
-            </td>
-
-            <td>
-
-                <a asp-controller="Trip"
-                   asp-action="Details"
-                   asp-route-id="@item.TripId"
-                   class="btn btn-info btn-sm">
-                    Xem nhóm
-                </a>
-
-                @if (item.Status == "Chưa tham gia")
-                {
-                    <form asp-controller="Trip"
-                          asp-action="Join"
-                          asp-route-id="@item.TripId"
-                          method="post"
-                          style="display:inline;">
-
-                        <button class="btn btn-success btn-sm">
-                            Tham gia
-                        </button>
-
-                    </form>
-                }
-
-            </td>
-        </tr>
-    }
-</table>
+<div class="container-fluid">
+    <div class="mb-4">
+        <h2 class="fw-bold">
+            🎯 Ghép nhóm du lịch thông minh
+        </h2>
+        <p class="text-muted">
+            Tìm những nhóm có sở thích phù hợp với bạn
+        </p>
+    </div>
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                🌎 Danh sách nhóm phù hợp
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nhóm</th>
+                            <th>Sở thích</th>
+                            <th>Độ phù hợp</th>
+                            <th>Thành viên</th>
+                            <th>Trạng thái</th>
+                            <th width="220">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">
+                                        @item.TripTitle
+                                    </strong>
+                                </td>
+                                <td>
+                                    @foreach (var interest in item.Interests)
+                                    {
+                                        <span class="badge bg-secondary me-1 mb-1">
+                                            @interest
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.MatchPercent >= 80)
+                                    {
+                                        <span class="badge bg-success fs-6">
+                                            @item.MatchPercent %
+                                        </span>
+                                    }
+                                    else if (item.MatchPercent >= 50)
+                                    {
+                                        <span class="badge bg-warning text-dark fs-6">
+                                            @item.MatchPercent %
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger fs-6">
+                                            @item.MatchPercent %
+                                        </span>
+                                    }
+                                    <br />
+                                    <small class="text-muted">
+                                        @item.CommonInterestCount /
+                                        @item.TotalTripInterestCount sở thích khớp
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        👥 @item.MemberCount người
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.Status == "Trưởng nhóm")
+                                    {
+                                        <span class="badge bg-success">
+                                            👑 Trưởng nhóm
+                                        </span>
+                                    }
+                                    else if (item.Status == "Đã tham gia")
+                                    {
+                                        <span class="badge bg-primary">
+                                            ✔ Đã tham gia
+                                        </span>
+                                    }
+                                    else if (item.Status == "Chờ duyệt")
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Chờ duyệt
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            ➕ Chưa tham gia
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-controller="Trip"
+                                       asp-action="Details"
+                                       asp-route-id="@item.TripId"
+                                       class="btn btn-info btn-sm me-1">
+                                        🔍 Xem nhóm
+                                    </a>
+                                    @if (item.Status == "Chưa tham gia")
+                                    {
+                                        <form asp-controller="Trip"
+                                              asp-action="Join"
+                                              asp-route-id="@item.TripId"
+                                              method="post"
+                                              style="display:inline;">
+                                            <button class="btn btn-success btn-sm">
+                                                🚀 Tham gia
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

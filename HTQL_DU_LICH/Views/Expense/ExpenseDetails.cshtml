@@ -1,89 +1,253 @@
 ﻿@model HTQL_DU_LICH.ViewModels.ExpenseDetailsViewModel
 
-<h2>Chi tiết khoản chi</h2>
-
-<table class="table table-bordered">
-
-    <tr>
-        <th>Khoản chi</th>
-        <td>@Model.ExpenseTitle</td>
-    </tr>
-
-    <tr>
-        <th>Số tiền</th>
-        <td>@Model.Amount.ToString("N0") VNĐ</td>
-    </tr>
-
-    <tr>
-        <th>Người tạo</th>
-        <td>@Model.PaidBy</td>
-    </tr>
-
-</table>
-
-<hr />
-
-<h4>Tiến độ xác nhận</h4>
-
-<p>
-    <strong>
-        @Model.ApprovedCount /
-        @Model.TotalApprovals
-    </strong>
-    thành viên đã xác nhận
-</p>
-
-@if (Model.IsApproved)
-{
-    <div class="alert alert-success">
-
-        Khoản chi đã được duyệt và
-        đã được tính vào công nợ.
-
-    </div>
-}
-else
-{
-    <div class="alert alert-warning">
-
-        Đang chờ xác nhận từ các
-        thành viên còn lại.
-
-    </div>
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Chi tiết khoản chi";
 }
 
+<div class="container-fluid">
 
-<h4>Danh sách xác nhận</h4>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-<table class="table table-striped">
+        <div>
 
-    <tr>
-        <th>Thành viên</th>
-        <th>Trạng thái</th>
-    </tr>
+            <h2 class="fw-bold">
+                💰 Chi tiết khoản chi
+            </h2>
 
-    @foreach (var item in Model.Approvals)
-    {
-        <tr>
-            <td>@item.UserName</td>
+            <p class="text-muted mb-0">
+                Theo dõi tiến độ xác nhận và phân chia chi phí
+            </p>
 
-            <td>
+        </div>
 
-                @if (item.IsApproved)
+    </div>
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                📋 Thông tin khoản chi
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <div class="card dashboard-card">
+
+                        <div class="card-body">
+
+                            <h6 class="text-muted">
+                                Khoản chi
+                            </h6>
+
+                            <h5 class="fw-bold">
+                                @Model.ExpenseTitle
+                            </h5>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card dashboard-card">
+
+                        <div class="card-body">
+
+                            <h6 class="text-muted">
+                                Số tiền
+                            </h6>
+
+                            <h4 class="fw-bold text-danger">
+                                @Model.Amount.ToString("N0") VNĐ
+                            </h4>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card dashboard-card">
+
+                        <div class="card-body">
+
+                            <h6 class="text-muted">
+                                Người tạo
+                            </h6>
+
+                            <h5 class="fw-bold">
+                                @Model.PaidBy
+                            </h5>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-header bg-success text-white">
+
+            <h5 class="mb-0">
+                ✔ Tiến độ xác nhận
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            @{
+                double percent = 0;
+
+                if (Model.TotalApprovals > 0)
                 {
-                    <span class="badge bg-success">
-                        Đã xác nhận
-                    </span>
+                    percent =
+                        (double)Model.ApprovedCount
+                        / Model.TotalApprovals * 100;
                 }
-                else
-                {
-                    <span class="badge bg-warning">
-                        Chờ xác nhận
-                    </span>
-                }
+            }
 
-            </td>
-        </tr>
-    }
+            <div class="mb-3">
 
-</table>
+                <strong>
+                    @Model.ApprovedCount /
+                    @Model.TotalApprovals
+                </strong>
+
+                thành viên đã xác nhận
+
+            </div>
+
+            <div class="progress mb-3">
+
+                <div class="progress-bar bg-success"
+                     style="width:@(percent)%">
+
+                    @percent.ToString("0")%
+
+                </div>
+
+            </div>
+
+            @if (Model.IsApproved)
+            {
+                <div class="alert alert-success">
+
+                    🎉 Khoản chi đã được duyệt và
+                    được tính vào công nợ.
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+
+                    ⏳ Đang chờ xác nhận từ các
+                    thành viên còn lại.
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+                👥 Danh sách xác nhận
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Thành viên</th>
+                            <th>Trạng thái</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model.Approvals)
+                        {
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        @item.UserName
+                                    </strong>
+                                </td>
+
+                                <td>
+
+                                    @if (item.IsApproved)
+                                    {
+                                        <span class="badge bg-success">
+                                            ✔ Đã xác nhận
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Chờ xác nhận
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+
+        <a asp-controller="Expense"
+           asp-action="Index"
+           class="btn btn-secondary">
+
+            ← Quay lại danh sách
+
+        </a>
+
+    </div>
+
+</div>

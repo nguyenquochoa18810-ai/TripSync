@@ -2,92 +2,78 @@
 
 @{
     Layout = "~/Views/Shared/_VendorLayout.cshtml";
+    ViewData["Title"] = "Vendor Dashboard";
 }
 
-<h2>
-    Vendor Dashboard
-</h2>
-
-<div class="row g-4 mt-2">
-
-    <div class="col-md-3">
-
-        <div class="card border-primary">
-
-            <div class="card-body">
-
-                <h6>
-                    Dịch vụ
-                </h6>
-
-                <h2>
-                    @Model.TotalServices
-                </h2>
-
-            </div>
-
-        </div>
-
+<div class="container-fluid">
+    <div class="mb-4">
+        <h2 class="fw-bold">
+            📊 Vendor Dashboard
+        </h2>
+        <p class="text-muted">
+            Tổng quan hoạt động dịch vụ của bạn
+        </p>
     </div>
-
-    <div class="col-md-3">
-
-        <div class="card border-success">
-
-            <div class="card-body">
-
-                <h6>
-                    Booking
-                </h6>
-
-                <h2>
-                    @Model.TotalBookings
-                </h2>
-
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <div class="display-5 mb-2">
+                        🏨
+                    </div>
+                    <h6>
+                        Tổng dịch vụ
+                    </h6>
+                    <h2 class="fw-bold">
+                        @Model.TotalServices
+                    </h2>
+                </div>
             </div>
-
         </div>
-
-    </div>
-
-    <div class="col-md-3">
-
-        <div class="card border-warning">
-
-            <div class="card-body">
-
-                <h6>
-                    Chờ xác nhận
-                </h6>
-
-                <h2>
-                    @Model.PendingBookings
-                </h2>
-
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <div class="display-5 mb-2">
+                        📅
+                    </div>
+                    <h6>
+                        Tổng Booking
+                    </h6>
+                    <h2 class="fw-bold">
+                        @Model.TotalBookings
+                    </h2>
+                </div>
             </div>
-
         </div>
-
-    </div>
-
-    <div class="col-md-3">
-
-        <div class="card border-danger">
-
-            <div class="card-body">
-
-                <h6>
-                    Đánh giá
-                </h6>
-
-                <h2>
-                    @Model.TotalReviews
-                </h2>
-
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-warning text-dark h-100">
+                <div class="card-body text-center">
+                    <div class="display-5 mb-2">
+                        ⏳
+                    </div>
+                    <h6>
+                        Chờ xác nhận
+                    </h6>
+                    <h2 class="fw-bold">
+                        @Model.PendingBookings
+                    </h2>
+                </div>
             </div>
-
         </div>
-
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-danger text-white h-100">
+                <div class="card-body text-center">
+                    <div class="display-5 mb-2">
+                        ⭐
+                    </div>
+                    <h6>
+                        Đánh giá
+                    </h6>
+                    <h2 class="fw-bold">
+                        @Model.TotalReviews
+                    </h2>
+                </div>
+            </div>
+        </div>
     </div>
-
 </div>

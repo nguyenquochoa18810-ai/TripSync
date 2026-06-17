@@ -206,20 +206,32 @@ namespace HTQL_DU_LICH.Controllers
             ViewBag.UserId = user.Id;
             ViewBag.Email = user.Email;
 
+            var tripIds =
+                _context.TripMembers
+                .Where(x => x.UserId == user.Id)
+                .Select(x => x.TripGroupId)
+                .ToList();
+
             var totalExpense =
                 _context.Expenses
-                .Where(x => x.IsApproved)
-                .Sum(x => x.Amount);
+                .Where(x =>
+                    tripIds.Contains(x.TripGroupId)
+                    && x.IsApproved)
+                .Sum(x => (decimal?)x.Amount) ?? 0;
 
             var youOwe =
             (
-                from split in _context.ExpenseSplits
-                join expense in _context.Expenses
-                    on split.ExpenseId equals expense.Id
-                where split.UserId == user.Id
-                    && expense.PaidByUserId != user.Id
-                    && expense.IsApproved
-                select split.Amount
+            from split in _context.ExpenseSplits
+            join expense in _context.Expenses
+                on split.ExpenseId equals expense.Id
+
+            where split.UserId == user.Id
+                && expense.PaidByUserId != user.Id
+                && expense.IsApproved
+                && !split.IsPaid
+                && tripIds.Contains(expense.TripGroupId)
+
+            select split.Amount
             ).Sum();
 
             var debtDetails =
@@ -233,17 +245,17 @@ namespace HTQL_DU_LICH.Controllers
                     on expense.PaidByUserId equals payer.Id
 
                 where split.UserId == user.Id
-                        && expense.PaidByUserId != user.Id
-                        && expense.IsApproved
+                    && expense.IsApproved
+                    && tripIds.Contains(expense.TripGroupId)
 
                 select new UserDebtDetailViewModel
                 {
                     ExpenseTitle = expense.Title,
 
                     PaidBy =
-                    string.IsNullOrEmpty(payer.FullName)
-                    ? payer.Email
-                    : payer.FullName,
+                        string.IsNullOrEmpty(payer.FullName)
+                        ? payer.Email
+                        : payer.FullName,
 
                     ExpenseAmount = expense.Amount,
 
@@ -253,7 +265,6 @@ namespace HTQL_DU_LICH.Controllers
 
                     YourShare = split.Amount
                 }
-
             ).ToList();
 
             var youAreOwed =
@@ -261,9 +272,13 @@ namespace HTQL_DU_LICH.Controllers
                 from split in _context.ExpenseSplits
                 join expense in _context.Expenses
                     on split.ExpenseId equals expense.Id
+
                 where expense.PaidByUserId == user.Id
                     && split.UserId != user.Id
                     && expense.IsApproved
+                    && !split.IsPaid
+                    && tripIds.Contains(expense.TripGroupId)
+
                 select split.Amount
             ).Sum();
 
@@ -349,6 +364,53 @@ namespace HTQL_DU_LICH.Controllers
 
             split.PaidAt = DateTime.Now;
 
+            var expense =
+                _context.Expenses
+                .FirstOrDefault(x => x.Id == split.ExpenseId);
+
+            if (expense != null)
+            {
+                var payer =
+                    await _userManager.GetUserAsync(User);
+
+                _context.Notifications.Add(
+
+                    new Notification
+                    {
+                        UserId = expense.PaidByUserId,
+
+                        Title = "Thanh toán hoàn tất",
+
+                        Content =
+                            $"{payer?.Email} đã xác nhận thanh toán khoản '{expense.Title}'",
+
+                        IsRead = false,
+
+                        CreatedAt = DateTime.Now
+                    });
+
+                var currentUser =
+                    await _userManager.GetUserAsync(User);
+
+                if (currentUser != null)
+                {
+                    _context.Notifications.Add(
+                        new Notification
+                        {
+                            UserId = currentUser.Id,
+
+                            Title = "Đã thanh toán",
+
+                            Content =
+                                $"Bạn đã thanh toán khoản '{expense.Title}' thành công",
+
+                            IsRead = false,
+
+                            CreatedAt = DateTime.Now
+                        });
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Debts));
@@ -390,21 +452,29 @@ namespace HTQL_DU_LICH.Controllers
                 {
                     expense.IsApproved = true;
 
-                    // Thông báo cho người tạo khoản chi
-                    _context.Notifications.Add(
-                        new Notification
-                        {
-                            UserId = expense.PaidByUserId,
+                    var memberIds =
+                        _context.TripMembers
+                        .Where(x => x.TripGroupId == expense.TripGroupId)
+                        .Select(x => x.UserId)
+                        .ToList();
 
-                            Title = "Khoản chi đã được duyệt",
+                    foreach (var memberId in memberIds)
+                    {
+                        _context.Notifications.Add(
+                            new Notification
+                            {
+                                UserId = memberId,
 
-                            Content =
-                                $"Khoản chi '{expense.Title}' đã được tất cả thành viên xác nhận.",
+                                Title = "Khoản chi đã được duyệt",
 
-                            IsRead = false,
+                                Content =
+                                    $"Khoản chi '{expense.Title}' đã được tất cả thành viên xác nhận.",
 
-                            CreatedAt = DateTime.Now
-                        });
+                                IsRead = false,
+
+                                CreatedAt = DateTime.Now
+                            });
+                    }
 
                     await _context.SaveChangesAsync();
                 }
@@ -477,8 +547,20 @@ namespace HTQL_DU_LICH.Controllers
             return View(model);
         }
 
-        public IActionResult Transactions()
+        public async Task<IActionResult> Transactions()
         {
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return RedirectToAction("Login", "Auth");
+
+            var tripIds =
+                _context.TripMembers
+                .Where(x => x.UserId == user.Id)
+                .Select(x => x.TripGroupId)
+                .ToList();
+
             var data =
             (
                 from split in _context.ExpenseSplits
@@ -497,6 +579,7 @@ namespace HTQL_DU_LICH.Controllers
 
                 where split.IsPaid
                     && expense.IsApproved
+                    && tripIds.Contains(expense.TripGroupId)
 
                 select new TransactionHistoryViewModel
                 {
@@ -521,8 +604,9 @@ namespace HTQL_DU_LICH.Controllers
                     IsCompleted = split.TransferConfirmed
                 }
 
-            ).OrderByDescending(x => x.PaidAt)
-             .ToList();
+            )
+            .OrderByDescending(x => x.PaidAt)
+            .ToList();
 
             return View(data);
         }
