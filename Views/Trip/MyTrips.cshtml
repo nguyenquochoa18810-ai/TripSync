@@ -1,0 +1,183 @@
+﻿@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Nhóm du lịch";
+}
+
+@model HTQL_DU_LICH.ViewModels.MyTripsViewModel
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h3 class="mb-0">Nhóm du lịch của tôi</h3>
+
+        <a asp-action="Create" class="btn btn-success">
+            + Tạo chuyến đi mới
+        </a>
+
+    </div>
+
+    <!-- CREATED -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-primary text-white">
+            📌 Nhóm tôi tạo
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.CreatedTrips.Any())
+            {
+                <div class="row">
+
+                    @foreach (var trip in Model.CreatedTrips)
+                    {
+                        <div class="col-md-6 mb-3">
+
+                            <div class="card border-0 shadow-sm h-100">
+
+                                <div class="card-body">
+
+                                    <h5 class="mb-1">@trip.Title</h5>
+
+                                    <p class="text-muted mb-3">
+                                        📍 @trip.Destination
+                                    </p>
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@trip.Id"
+                                       class="btn btn-primary btn-sm">
+                                        Chi tiết
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="text-muted">
+                    Chưa tạo nhóm nào.
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    <!-- JOINED -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-info text-white">
+            📌 Nhóm tôi tham gia
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.JoinedTrips.Any())
+            {
+                <div class="row">
+
+                    @foreach (var trip in Model.JoinedTrips)
+                    {
+                        <div class="col-md-6 mb-3">
+
+                            <div class="card border-0 shadow-sm h-100">
+
+                                <div class="card-body">
+
+                                    <h5>@trip.Title</h5>
+
+                                    <p class="text-muted">
+                                        📍 @trip.Destination
+                                    </p>
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@trip.Id"
+                                       class="btn btn-info btn-sm">
+                                        Chi tiết
+                                    </a>
+
+                                    <a asp-action="Leave"
+                                       asp-route-id="@trip.Id"
+                                       class="btn btn-warning btn-sm">
+                                        Rời nhóm
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="text-muted">
+                    Chưa tham gia nhóm nào.
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    <!-- PENDING -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-warning">
+            📌 Nhóm đang chờ duyệt
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.PendingTrips.Any())
+            {
+                <div class="row">
+
+                    @foreach (var trip in Model.PendingTrips)
+                    {
+                        <div class="col-md-6 mb-3">
+
+                            <div class="card border-0 shadow-sm h-100">
+
+                                <div class="card-body">
+
+                                    <h5>@trip.Title</h5>
+
+                                    <p class="text-muted">
+                                        📍 @trip.Destination
+                                    </p>
+
+                                    <span class="badge bg-warning text-dark">
+                                        Đang chờ duyệt
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="text-muted">
+                    Không có yêu cầu nào đang chờ.
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

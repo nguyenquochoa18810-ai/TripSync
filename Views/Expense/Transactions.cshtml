@@ -1,0 +1,236 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.TransactionHistoryViewModel>
+
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Lịch sử giao dịch";
+}
+
+<div class="container-fluid">
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+            💸 Lịch sử giao dịch
+        </h2>
+
+        <p class="text-muted">
+            Theo dõi toàn bộ các khoản thanh toán giữa thành viên trong chuyến đi
+        </p>
+
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card dashboard-card shadow border-0">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <small class="text-muted">
+                                Tổng giao dịch
+                            </small>
+
+                            <h3 class="fw-bold text-primary mt-2">
+                                @Model.Count
+                            </h3>
+
+                        </div>
+
+                        <div class="icon-box bg-primary">
+                            📄
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card dashboard-card shadow border-0">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <small class="text-muted">
+                                Hoàn tất
+                            </small>
+
+                            <h3 class="fw-bold text-success mt-2">
+                                @Model.Count(x => x.IsCompleted)
+                            </h3>
+
+                        </div>
+
+                        <div class="icon-box bg-success">
+                            ✔
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card dashboard-card shadow border-0">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <small class="text-muted">
+                                Đang xử lý
+                            </small>
+
+                            <h3 class="fw-bold text-warning mt-2">
+                                @Model.Count(x => !x.IsCompleted)
+                            </h3>
+
+                        </div>
+
+                        <div class="icon-box bg-warning">
+                            ⏳
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-body">
+
+            <h5 class="text-muted">
+                Tổng giá trị giao dịch
+            </h5>
+
+            <h2 class="fw-bold text-danger">
+
+                @Model.Sum(x => x.Amount).ToString("N0") VNĐ
+
+            </h2>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                📋 Danh sách giao dịch
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Ngày thanh toán</th>
+                            <th>Chuyến đi</th>
+                            <th>Khoản chi</th>
+                            <th>Người chuyển</th>
+                            <th>Người nhận</th>
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    @(item.PaidAt?.ToString("dd/MM/yyyy HH:mm"))
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @item.TripName
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @item.ExpenseTitle
+                                </td>
+
+                                <td>
+                                    <span class="text-danger fw-bold">
+                                        @item.Sender
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="text-success fw-bold">
+                                        @item.Receiver
+                                    </span>
+                                </td>
+
+                                <td class="fw-bold text-primary">
+                                    @item.Amount.ToString("N0") VNĐ
+                                </td>
+
+                                <td>
+
+                                    @if (item.IsCompleted)
+                                    {
+                                        <span class="badge bg-success">
+                                            ✔ Hoàn tất
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Đang xử lý
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,253 @@
+﻿@model HTQL_DU_LICH.ViewModels.ExpenseDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Chi tiết khoản chi";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+                💰 Chi tiết khoản chi
+            </h2>
+
+            <p class="text-muted mb-0">
+                Theo dõi tiến độ xác nhận và phân chia chi phí
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                📋 Thông tin khoản chi
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <div class="card dashboard-card">
+
+                        <div class="card-body">
+
+                            <h6 class="text-muted">
+                                Khoản chi
+                            </h6>
+
+                            <h5 class="fw-bold">
+                                @Model.ExpenseTitle
+                            </h5>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card dashboard-card">
+
+                        <div class="card-body">
+
+                            <h6 class="text-muted">
+                                Số tiền
+                            </h6>
+
+                            <h4 class="fw-bold text-danger">
+                                @Model.Amount.ToString("N0") VNĐ
+                            </h4>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card dashboard-card">
+
+                        <div class="card-body">
+
+                            <h6 class="text-muted">
+                                Người tạo
+                            </h6>
+
+                            <h5 class="fw-bold">
+                                @Model.PaidBy
+                            </h5>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-header bg-success text-white">
+
+            <h5 class="mb-0">
+                ✔ Tiến độ xác nhận
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            @{
+                double percent = 0;
+
+                if (Model.TotalApprovals > 0)
+                {
+                    percent =
+                        (double)Model.ApprovedCount
+                        / Model.TotalApprovals * 100;
+                }
+            }
+
+            <div class="mb-3">
+
+                <strong>
+                    @Model.ApprovedCount /
+                    @Model.TotalApprovals
+                </strong>
+
+                thành viên đã xác nhận
+
+            </div>
+
+            <div class="progress mb-3">
+
+                <div class="progress-bar bg-success"
+                     style="width:@(percent)%">
+
+                    @percent.ToString("0")%
+
+                </div>
+
+            </div>
+
+            @if (Model.IsApproved)
+            {
+                <div class="alert alert-success">
+
+                    🎉 Khoản chi đã được duyệt và
+                    được tính vào công nợ.
+
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+
+                    ⏳ Đang chờ xác nhận từ các
+                    thành viên còn lại.
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+                👥 Danh sách xác nhận
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Thành viên</th>
+                            <th>Trạng thái</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model.Approvals)
+                        {
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        @item.UserName
+                                    </strong>
+                                </td>
+
+                                <td>
+
+                                    @if (item.IsApproved)
+                                    {
+                                        <span class="badge bg-success">
+                                            ✔ Đã xác nhận
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Chờ xác nhận
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+
+        <a asp-controller="Expense"
+           asp-action="Index"
+           class="btn btn-secondary">
+
+            ← Quay lại danh sách
+
+        </a>
+
+    </div>
+
+</div>

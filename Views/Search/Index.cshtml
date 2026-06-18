@@ -1,0 +1,75 @@
+﻿@model List<HTQL_DU_LICH.Models.TripGroup>
+
+@{
+    ViewData["Title"] = "Tìm kiếm chuyến đi";
+}
+
+<div class="container mt-4">
+    <h3 class="mb-3">
+        🔍 Tìm kiếm chuyến đi
+    </h3>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-10">
+                        <input type="text"
+                               name="keyword"
+                               class="form-control form-control-lg"
+                               placeholder="Nhập tên nhóm hoặc điểm đến..." />
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="submit"
+                                class="btn btn-primary btn-lg">
+                            Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tên nhóm</th>
+                            <th>Điểm đến</th>
+                            <th>Ngân sách</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trip in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    @trip.Title
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">
+                                        @trip.Destination
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-success fw-bold">
+                                        @trip.Budget.ToString("N0") VNĐ
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn btn-outline-primary btn-sm"
+                                       asp-controller="Trip"
+                                       asp-action="Details"
+                                       asp-route-id="@trip.Id">
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

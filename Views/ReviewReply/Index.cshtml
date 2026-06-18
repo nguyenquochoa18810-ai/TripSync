@@ -1,0 +1,50 @@
+﻿@model IEnumerable<HTQL_DU_LICH.Models.ReviewReply>
+
+@{
+    ViewData["Title"] = "Danh sách phản hồi đánh giá";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">
+            Danh sách phản hồi đánh giá
+        </h3>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Review ID</th>
+                            <th>Nội dung phản hồi</th>
+                            <th>Ngày tạo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        @item.ReviewId
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="text-wrap">
+                                        @item.ReplyContent
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted">
+                                        @item.CreatedAt
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

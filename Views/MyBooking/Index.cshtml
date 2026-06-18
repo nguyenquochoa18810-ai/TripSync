@@ -1,0 +1,170 @@
+﻿@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Booking của tôi";
+}
+
+@model IEnumerable<HTQL_DU_LICH.ViewModels.MyBookingViewModel>
+
+@{
+    ViewData["Title"] = "Booking của tôi";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-warning shadow-sm">
+
+        ⚠️ @TempData["Error"]
+
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success shadow-sm">
+
+        ✅ @TempData["Success"]
+
+    </div>
+}
+
+<div class="container-fluid">
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+            📖 Booking của tôi
+        </h2>
+
+        <p class="text-muted">
+            Theo dõi các dịch vụ đã đặt và đánh giá trải nghiệm của bạn
+        </p>
+
+    </div>
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                🏨 Danh sách Booking
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Nhóm du lịch</th>
+                            <th>Dịch vụ</th>
+                            <th>Ngày đặt</th>
+                            <th>Trạng thái & Đánh giá</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+
+                                    <strong class="text-primary">
+
+                                        @item.TripName
+
+                                    </strong>
+
+                                </td>
+
+                                <td>
+
+                                    @item.ServiceName
+
+                                </td>
+
+                                <td>
+
+                                    <span class="badge bg-info">
+
+                                        📅 @item.BookingDate.ToString("dd/MM/yyyy")
+
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    @if (item.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success mb-2">
+
+                                            ✔ Hoàn thành
+
+                                        </span>
+                                    }
+                                    else if (item.Status == "Confirmed")
+                                    {
+                                        <span class="badge bg-primary mb-2">
+
+                                            🚀 Đã xác nhận
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark mb-2">
+
+                                            ⏳ @item.Status
+
+                                        </span>
+                                    }
+
+                                    <br />
+
+                                    @if (item.Status == "Completed")
+                                    {
+                                        if (item.IsReviewed)
+                                        {
+                                            <span class="badge bg-success">
+
+                                                ⭐ Đã đánh giá
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Review"
+                                               asp-action="Create"
+                                               asp-route-bookingId="@item.Id"
+                                               class="btn btn-warning btn-sm">
+
+                                                ⭐ Đánh giá ngay
+
+                                            </a>
+                                        }
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

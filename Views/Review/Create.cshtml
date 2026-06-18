@@ -1,0 +1,59 @@
+﻿@model HTQL_DU_LICH.Models.Review
+
+@{
+    ViewData["Title"] = "Đánh giá dịch vụ";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        ⭐ Đánh giá dịch vụ
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h5 class="text-muted">
+                            Chia sẻ trải nghiệm của bạn
+                        </h5>
+                        <p class="text-secondary">
+                            Đánh giá của bạn giúp các thành viên khác lựa chọn dịch vụ tốt hơn.
+                        </p>
+                    </div>
+                    <form method="post">
+                        <input asp-for="BookingId" type="hidden" />
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                Số sao đánh giá
+                            </label>
+                            <select asp-for="Rating"
+                                    class="form-select">
+                                <option value="5">⭐⭐⭐⭐⭐ - Tuyệt vời</option>
+                                <option value="4">⭐⭐⭐⭐ - Rất tốt</option>
+                                <option value="3">⭐⭐⭐ - Tốt</option>
+                                <option value="2">⭐⭐ - Bình thường</option>
+                                <option value="1">⭐ - Chưa hài lòng</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                Nhận xét của bạn
+                            </label>
+                            <textarea asp-for="Comment"
+                                      rows="6"
+                                      class="form-control"
+                                      placeholder="Hãy chia sẻ trải nghiệm thực tế của bạn..."></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-success btn-lg">
+                                ⭐ Gửi đánh giá
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

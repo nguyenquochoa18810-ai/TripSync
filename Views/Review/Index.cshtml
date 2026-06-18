@@ -1,0 +1,137 @@
+﻿@model IEnumerable<HTQL_DU_LICH.Models.Review>
+@using HTQL_DU_LICH.Models
+
+@{
+    ViewData["Title"] = "Danh sách đánh giá";
+}
+
+<div class="container-fluid">
+    <div class="mb-4">
+        <h2 class="fw-bold">
+            ⭐ Danh sách đánh giá dịch vụ
+        </h2>
+        <p class="text-muted">
+            Theo dõi phản hồi và đánh giá từ người dùng
+        </p>
+    </div>
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                📝 Đánh giá khách hàng
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Người dùng</th>
+                            <th>Dịch vụ</th>
+                            <th>Số sao</th>
+                            <th>Nội dung</th>
+                            <th>Phản hồi Vendor</th>
+                            <th>Ngày tạo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var user =
+                                ((List<ApplicationUser>)ViewBag.Users)
+                                .FirstOrDefault(x => x.Id == item.UserId);
+                            var booking =
+                                ((List<Booking>)ViewBag.Bookings)
+                                .FirstOrDefault(x => x.Id == item.BookingId);
+                            Service? service = null;
+                            if (booking != null)
+                            {
+                                service =
+                                    ((List<Service>)ViewBag.Services)
+                                    .FirstOrDefault(x =>
+                                        x.Id == booking.ServiceId);
+                            }
+                            var reply =
+                                ((List<ReviewReply>)ViewBag.Replies)
+                                .FirstOrDefault(x =>
+                                    x.ReviewId == item.Id);
+                            <tr>
+                                <td>
+                                    <strong>
+                                        @(user != null
+                                            ? (string.IsNullOrWhiteSpace(user.FullName)
+                                                ? user.Email
+                                                : user.FullName)
+                                            : "Không xác định")
+                                    </strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @(service?.Name)
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.Rating == 5)
+                                    {
+                                        <span class="badge bg-success">
+                                            ⭐⭐⭐⭐⭐
+                                        </span>
+                                    }
+                                    else if (item.Rating == 4)
+                                    {
+                                        <span class="badge bg-primary">
+                                            ⭐⭐⭐⭐
+                                        </span>
+                                    }
+                                    else if (item.Rating == 3)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⭐⭐⭐
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            @item.Rating ⭐
+                                        </span>
+                                    }
+                                </td>
+                                <td style="max-width:300px;">
+                                    @item.Comment
+                                </td>
+                                <td>
+                                    @if (reply != null)
+                                    {
+                                        <div class="alert alert-success mb-0">
+                                            💬 @reply.ReplyContent
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger mb-2">
+                                            Chưa phản hồi
+                                        </span>
+                                        @if (User.IsInRole("Vendor"))
+                                        {
+                                            <br />
+                                            <a asp-controller="ReviewReply"
+                                               asp-action="Create"
+                                               asp-route-reviewId="@item.Id"
+                                               class="btn btn-primary btn-sm mt-2">
+                                                💬 Phản hồi
+                                            </a>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        📅 @item.CreatedAt.ToString("dd/MM/yyyy")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

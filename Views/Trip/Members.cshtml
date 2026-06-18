@@ -1,0 +1,69 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.TripMemberViewModel>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h3 class="mb-0">Thành viên nhóm</h3>
+
+        <span class="text-muted">
+            Tổng thành viên: @Model.Count
+        </span>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <div class="row">
+
+                @foreach (var member in Model)
+                {
+                    <div class="col-md-6 col-lg-4 mb-3">
+
+                        <div class="card shadow-sm border-0 h-100">
+
+                            <div class="card-body d-flex align-items-start">
+
+                                <!-- Avatar -->
+                                <div class="me-3">
+                                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                                         style="width:50px;height:50px;font-weight:bold;">
+                                        @(
+                                        string.IsNullOrEmpty(member.FullName)
+                                        ? "?"
+                                        : member.FullName.Substring(0, 1).ToUpper()
+                                        )
+                                    </div>
+                                </div>
+
+                                <!-- Info -->
+                                <div>
+
+                                    <h5 class="mb-1">
+                                        @member.FullName
+                                    </h5>
+
+                                    <p class="text-muted mb-0">
+                                        @(string.IsNullOrEmpty(member.Bio)
+                                            ? "Chưa có giới thiệu"
+                                            : member.Bio)
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

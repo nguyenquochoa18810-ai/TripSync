@@ -1,0 +1,52 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.InterestSelectionViewModel>
+
+@{
+    ViewData["Title"] = "Sở thích du lịch";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        🌎 Sở thích du lịch
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Chọn những sở thích phù hợp để hệ thống gợi ý các nhóm du lịch phù hợp với bạn.
+                    </p>
+                    <form method="post">
+                        <div class="row">
+                            @for (int i = 0; i < Model.Count; i++)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="interest-card">
+                                        <div class="form-check">
+                                            <input asp-for="@Model[i].IsSelected"
+                                                   class="form-check-input" />
+                                            <input asp-for="@Model[i].Id"
+                                                   type="hidden" />
+                                            <input asp-for="@Model[i].Name"
+                                                   type="hidden" />
+                                            <label class="form-check-label fw-semibold">
+                                                @Model[i].Name
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <hr />
+                        <div class="text-end">
+                            <button class="btn btn-success btn-lg">
+                                💾 Lưu sở thích
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

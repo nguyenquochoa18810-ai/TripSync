@@ -1,0 +1,306 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.ExpenseListViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý chi phí";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="fw-bold">
+            💰 Quản lý chi phí
+        </h2>
+
+        <div>
+
+            <a asp-action="Summary"
+               class="btn btn-primary">
+
+                📊 Tổng quan tài chính
+
+            </a>
+
+            <a asp-action="Debts"
+               class="btn btn-warning">
+
+                💳 Công nợ
+
+            </a>
+
+            <a asp-action="Transactions"
+               class="btn btn-info text-white">
+
+                📜 Lịch sử giao dịch
+
+            </a>
+
+        </div>
+
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @{
+        var rejectRequests =
+            ViewBag.RejectRequests as List<HTQL_DU_LICH.ViewModels.RejectRequestViewModel>
+            ?? new List<HTQL_DU_LICH.ViewModels.RejectRequestViewModel>();
+    }
+    @if (rejectRequests.Any())
+    {
+        <div class="card shadow border-0 mb-4">
+
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    🚩 Yêu cầu từ chối chi phí cần bạn xác nhận
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nhóm</th>
+                                <th>Khoản chi</th>
+                                <th>Số tiền</th>
+                                <th>Người yêu cầu</th>
+                                <th width="220">Quyết định</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var r in rejectRequests)
+                            {
+                                <tr>
+                                    <td><strong>@r.TripName</strong></td>
+                                    <td>@r.ExpenseTitle</td>
+                                    <td class="fw-bold text-danger">
+                                        @r.Amount.ToString("N0") VNĐ
+                                    </td>
+                                    <td>@r.RequestedBy</td>
+                                    <td>
+                                        <form asp-controller="Expense"
+                                              asp-action="ConfirmReject"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Xác nhận từ chối và HUỶ khoản chi này?');">
+                                            <input type="hidden"
+                                                   name="requestId"
+                                                   value="@r.RequestId" />
+                                            <button class="btn btn-danger btn-sm">
+                                                ✔ Đồng ý huỷ
+                                            </button>
+                                        </form>
+
+                                        <form asp-controller="Expense"
+                                              asp-action="DenyReject"
+                                              method="post"
+                                              class="d-inline">
+                                            <input type="hidden"
+                                                   name="requestId"
+                                                   value="@r.RequestId" />
+                                            <button class="btn btn-secondary btn-sm">
+                                                ✖ Giữ lại
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                Danh sách chi phí
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Nhóm</th>
+                            <th>Tiêu đề</th>
+                            <th>Số tiền</th>
+                            <th>Người trả</th>
+                            <th>Trạng thái</th>
+                            <th>Tiến độ</th>
+                            <th width="220">Hành động</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    <strong>@item.TripName</strong>
+                                </td>
+
+                                <td>
+                                    @item.Title
+                                </td>
+
+                                <td class="fw-bold text-danger">
+                                    @item.Amount.ToString("N0") VNĐ
+                                </td>
+
+                                <td>
+                                    @item.PaidBy
+                                </td>
+
+                                <td>
+
+                                    @if (item.IsApproved)
+                                    {
+                                        <span class="badge bg-success">
+                                            ✔ Đã xác nhận
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Chờ xác nhận
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @{
+                                        double percent = 0;
+
+                                        if (item.TotalApprovals > 0)
+                                        {
+                                            percent =
+                                            (double)item.ApprovedCount
+                                            / item.TotalApprovals * 100;
+                                        }
+                                    }
+
+                                    <div class="progress">
+
+                                        <div class="progress-bar bg-success"
+                                             style="width:@percent%">
+
+                                            @item.ApprovedCount/@item.TotalApprovals
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    @{
+                                        var myPendingRejects =
+                                            ViewBag.MyPendingRejects as List<int>
+                                            ?? new List<int>();
+                                        bool isPendingReject =
+                                            myPendingRejects.Contains(item.Id);
+                                    }
+
+                                    <a asp-controller="Expense"
+                                       asp-action="ExpenseDetails"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-info btn-sm text-white">
+
+                                        🔍 Chi tiết
+
+                                    </a>
+
+                                    @if (isPendingReject)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            ⏳ Chờ trưởng nhóm duyệt từ chối
+                                        </span>
+                                    }
+                                    else if (!item.IsApproved && item.CanApprove)
+                                    {
+                                        <form asp-controller="Expense"
+                                              asp-action="ApproveExpense"
+                                              method="post"
+                                              class="d-inline">
+
+                                            <input type="hidden"
+                                                   name="expenseId"
+                                                   value="@item.Id" />
+
+                                            <button class="btn btn-success btn-sm"
+                                                    title="Đồng ý khoản chi">
+
+                                                ✔
+
+                                            </button>
+
+                                        </form>
+
+                                        <form asp-controller="Expense"
+                                              asp-action="RejectExpense"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Gửi yêu cầu từ chối khoản chi này tới trưởng nhóm?');">
+
+                                            <input type="hidden"
+                                                   name="expenseId"
+                                                   value="@item.Id" />
+
+                                            <button class="btn btn-danger btn-sm"
+                                                    title="Từ chối (gửi trưởng nhóm xác nhận)">
+
+                                                ✖
+
+                                            </button>
+
+                                        </form>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,224 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.DebtViewModel>
+
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Quản lý công nợ";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+                💳 Quản lý công nợ
+            </h2>
+
+            <p class="text-muted mb-0">
+                Theo dõi các khoản thanh toán giữa thành viên trong chuyến đi
+            </p>
+
+        </div>
+
+        <span class="badge bg-primary fs-6 p-2">
+            Tổng khoản nợ: @Model.Count
+        </span>
+
+    </div>
+
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card dashboard-card shadow">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Tổng công nợ
+                    </h6>
+
+                    <h3 class="text-danger fw-bold">
+
+                        @Model.Sum(x => x.Amount).ToString("N0") VNĐ
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card dashboard-card shadow">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Đã thanh toán
+                    </h6>
+
+                    <h3 class="text-success fw-bold">
+
+                        @Model.Count(x => x.IsPaid)
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card dashboard-card shadow">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted">
+                        Chưa thanh toán
+                    </h6>
+
+                    <h3 class="text-warning fw-bold">
+
+                        @Model.Count(x => !x.IsPaid)
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-danger text-white">
+
+            <h5 class="mb-0">
+                📋 Danh sách công nợ
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Chuyến đi</th>
+                            <th>Khoản chi</th>
+                            <th>Người nợ</th>
+                            <th>Người nhận</th>
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                            <th width="180">
+                                Thao tác
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        @item.TripName
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @item.ExpenseTitle
+                                </td>
+
+                                <td>
+                                    <span class="fw-bold text-danger">
+                                        @item.DebtorName
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="fw-bold text-success">
+                                        @item.CreditorName
+                                    </span>
+                                </td>
+
+                                <td class="fw-bold text-primary">
+                                    @item.Amount.ToString("N0") VNĐ
+                                </td>
+
+                                <td>
+
+                                    @if (item.IsPaid)
+                                    {
+                                        <span class="badge bg-success">
+                                            ✔ Đã thanh toán
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            ⏳ Chưa thanh toán
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @if (!item.IsPaid)
+                                    {
+                                        <form asp-controller="Expense"
+                                              asp-action="MarkPaid"
+                                              method="post">
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@item.ExpenseSplitId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-success btn-sm">
+
+                                                ✔ Xác nhận
+
+                                            </button>
+
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success fw-bold">
+                                            Hoàn tất
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,108 @@
+﻿@model HTQL_DU_LICH.ViewModels.CreateExpenseViewModel
+
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Thêm chi phí";
+}
+
+<div class="container mt-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-6">
+
+            <div class="card shadow border-0">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h3 class="mb-0">
+                        💰 Thêm chi phí mới
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    <form method="post">
+
+                        <input asp-for="TripGroupId" type="hidden" />
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3">
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label asp-for="Title"
+                                   class="form-label fw-bold">
+
+                                Tên chi phí
+
+                            </label>
+
+                            <input asp-for="Title"
+                                   class="form-control"
+                                   placeholder="Ví dụ: Thuê khách sạn" />
+
+                            <span asp-validation-for="Title"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label asp-for="Amount"
+                                   class="form-label fw-bold">
+
+                                Số tiền (VNĐ)
+
+                            </label>
+
+                            <input asp-for="Amount"
+                                   class="form-control"
+                                   placeholder="Nhập số tiền..." />
+
+                            <span asp-validation-for="Amount"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                        <div class="d-flex gap-2">
+
+                            <button type="submit"
+                                    class="btn btn-success">
+
+                                💾 Lưu chi phí
+
+                            </button>
+
+                            <a asp-controller="Expense"
+                               asp-action="Index"
+                               class="btn btn-secondary">
+
+                                ↩ Quay lại
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,92 @@
+﻿@model IEnumerable<HTQL_DU_LICH.Models.Service>
+
+@{
+    ViewData["Title"] = "Dịch vụ du lịch";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+                🌎 Dịch vụ du lịch
+            </h2>
+
+            <p class="text-muted">
+                Khám phá các dịch vụ hỗ trợ cho chuyến đi của bạn
+            </p>
+
+        </div>
+
+        <span class="badge bg-primary p-2 fs-6">
+            Tổng: @Model.Count() dịch vụ
+        </span>
+
+    </div>
+
+    <div class="row">
+
+        @foreach (var item in Model)
+        {
+            <div class="col-lg-4 col-md-6 mb-4">
+
+                <div class="card shadow border-0 h-100">
+
+                    <div class="card-header bg-primary text-white">
+
+                        <h5 class="mb-0">
+                            @item.Name
+                        </h5>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="mb-3">
+
+                            <span class="badge bg-info text-dark">
+                                @item.ServiceType
+                            </span>
+
+                        </div>
+
+                        <h3 class="text-danger fw-bold">
+
+                            @item.Price.ToString("N0") VNĐ
+
+                        </h3>
+
+                        <p class="text-muted">
+
+                            @(string.IsNullOrEmpty(item.Description)
+                                ? "Chưa có mô tả."
+                                : item.Description.Length > 100
+                                    ? item.Description.Substring(0, 100) + "..."
+                                    : item.Description)
+
+                        </p>
+
+                    </div>
+
+                    <div class="card-footer bg-white border-0">
+
+                        <a asp-action="Details"
+                           asp-route-id="@item.Id"
+                           class="btn btn-primary w-100">
+
+                            🔍 Xem chi tiết
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

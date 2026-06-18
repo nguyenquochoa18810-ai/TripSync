@@ -1,0 +1,161 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width:768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    background: #f5f7fb;
+}
+
+/* CARD */
+.card {
+    border-radius: 18px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+
+.card-header {
+    border-radius: 18px 18px 0 0 !important;
+    font-weight: 600;
+}
+
+/* DASHBOARD */
+.dashboard-card {
+    border-radius: 18px;
+    transition: all .3s ease;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    }
+
+/* SERVICE CARD */
+.service-card {
+    border-radius: 18px;
+    transition: all .3s ease;
+}
+
+    .service-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0,0,0,.15);
+    }
+
+/* ICON */
+.icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: white;
+}
+
+/* TABLE */
+.table {
+    vertical-align: middle;
+}
+
+    .table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+/* BADGE */
+.badge {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* BUTTON */
+.btn {
+    border-radius: 10px;
+    transition: .3s;
+}
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+.btn-sm {
+    border-radius: 8px;
+}
+
+/* FORM */
+.form-control,
+.form-select {
+    border-radius: 10px;
+    padding: 10px;
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37,99,235,.25);
+    }
+
+textarea {
+    resize: none;
+}
+
+/* ALERT */
+.alert {
+    border-radius: 12px;
+}
+
+/* COLORS */
+.text-primary {
+    color: #2563eb !important;
+}
+
+.text-success {
+    color: #16a34a !important;
+}
+
+.text-danger {
+    color: #dc2626 !important;
+}
+
+/* PROGRESS */
+.progress {
+    height: 25px;
+    border-radius: 15px;
+}
+
+.progress-bar {
+    font-weight: 600;
+}
+
+/* INTEREST */
+.interest-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 15px;
+    transition: .3s;
+    background: white;
+}
+
+    .interest-card:hover {
+        border-color: #2563eb;
+        background: #f8fafc;
+        transform: translateY(-2px);
+    }
+
+/* PROFILE */
+.profile-avatar {
+    object-fit: cover;
+    border: 5px solid white;
+}

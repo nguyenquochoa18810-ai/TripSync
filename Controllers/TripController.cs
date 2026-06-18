@@ -1,0 +1,1233 @@
+﻿using HTQL_DU_LICH.Data;
+using HTQL_DU_LICH.Models;
+using HTQL_DU_LICH.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Security.Claims;
+
+namespace HTQL_DU_LICH.Controllers
+{
+    [Authorize]
+    public class TripController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public TripController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
+        {
+            _context = context;
+            _userManager = userManager;
+        }
+
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(MyTrips));
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            ViewBag.Interests =
+                _context.Interests.ToList();
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateTripViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+            var trip = new TripGroup
+            {
+                Title = model.Title,
+                Destination = model.Destination,
+                StartDate = model.StartDate,
+                EndDate = model.EndDate,
+                Budget = model.Budget,
+                Description = model.Description,
+                LeaderId = user.Id
+            };
+            _context.TripGroups.Add(trip);
+            await _context.SaveChangesAsync();
+
+            // ==========================================
+            // ĐOẠN CODE LƯU SỞ THÍCH ĐƯỢC THÊM VÀO ĐÂY
+            // ==========================================
+            if (model.SelectedInterests != null)
+            {
+                foreach (var interestId in model.SelectedInterests)
+                {
+                    _context.TripInterests.Add(
+                        new TripInterest
+                        {
+                            TripGroupId = trip.Id,
+                            InterestId = interestId
+                        });
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            _context.TripMembers.Add(new TripMember
+            {
+                TripGroupId = trip.Id,
+                UserId = user.Id
+            });
+            await _context.SaveChangesAsync();
+            return RedirectToAction("MyTrips");
+        }
+
+        // ==========================================
+        // CẬP NHẬT ACTION MYTRIPS (PHÂN LOẠI CHUYẾN ĐI)
+        // ==========================================
+        public IActionResult MyTrips()
+        {
+            var userId =
+                User.FindFirst(
+                    ClaimTypes.NameIdentifier
+                )?.Value;
+
+            var model = new MyTripsViewModel();
+
+            model.CreatedTrips =
+                _context.TripGroups
+                .Where(x => x.LeaderId == userId)
+                .ToList();
+
+            model.JoinedTrips =
+            (
+                from tm in _context.TripMembers
+                join t in _context.TripGroups
+                    on tm.TripGroupId equals t.Id
+                where tm.UserId == userId
+                   && t.LeaderId != userId
+                select t
+            ).ToList();
+
+            model.PendingTrips =
+            (
+                from jr in _context.JoinRequests
+                join t in _context.TripGroups
+                    on jr.TripGroupId equals t.Id
+                where jr.UserId == userId
+                   && jr.Status == "Pending"
+                select t
+            ).Distinct().ToList();
+
+            return View(model);
+        }
+
+        //ACTION DETAIL
+        public IActionResult Details(int id)
+        {
+            var trip = _context.TripGroups
+                .FirstOrDefault(x => x.Id == id);
+
+            if (trip == null)
+                return NotFound();
+
+            var leader = _context.Users
+                .FirstOrDefault(x => x.Id == trip.LeaderId);
+
+            ViewBag.Leader = leader;
+
+            ViewBag.Members =
+            (
+                from tm in _context.TripMembers
+                join u in _context.Users
+                    on tm.UserId equals u.Id
+                where tm.TripGroupId == id
+                select u
+            ).ToList();
+
+            ViewBag.Expenses = _context.Expenses
+                .Where(x => x.TripGroupId == id)
+                .ToList();
+
+            ViewBag.TotalExpense =
+                _context.Expenses
+                .Where(x => x.TripGroupId == id)
+                .Sum(x => x.Amount);
+
+            ViewBag.AppliedServices =
+            (
+                from ts in _context.TripServices
+                join s in _context.Services
+                    on ts.ServiceId equals s.Id
+                where ts.TripGroupId == id
+                select new
+                {
+                    Id = ts.Id,
+
+                    ServiceId = s.Id,
+
+                    ServiceName = s.Name,
+
+                    AppliedAt = ts.AppliedAt
+                }
+            ).ToList();
+
+            // ==========================================
+            // KIỂM TRA QUYỀN VÀ TRẠNG THÁI THÀNH VIÊN
+            // ==========================================
+            var currentUserId =
+                User.FindFirst(
+                    System.Security.Claims.ClaimTypes.NameIdentifier
+                )?.Value;
+
+            ViewBag.IsMember =
+                _context.TripMembers.Any(x =>
+                    x.TripGroupId == id &&
+                    x.UserId == currentUserId);
+
+            ViewBag.IsLeader =
+                trip.LeaderId == currentUserId;
+
+            ViewBag.Requests =
+            (
+                from r in _context.JoinRequests
+                join u in _context.Users
+                    on r.UserId equals u.Id
+                where r.TripGroupId == id
+                select new
+                {
+                    r.UserId,
+
+                    UserName =
+                        string.IsNullOrEmpty(u.FullName)
+                        ? u.Email
+                        : u.FullName,
+
+                    Email = u.Email,
+
+                    Status = r.Status
+                }
+            ).ToList();
+
+            var messages =
+(
+    from m in _context.GroupMessages
+    join u in _context.Users
+        on m.UserId equals u.Id
+    where m.TripGroupId == id
+    orderby m.SentAt
+    select new
+    {
+        Id = m.Id,
+        UserId = m.UserId,
+        UserName =
+            string.IsNullOrEmpty(u.FullName)
+            ? u.Email
+            : u.FullName,
+
+        Message = m.Message,
+
+        Time = m.SentAt
+    }
+).ToList();
+
+            ViewBag.Messages = messages;
+
+            ViewBag.Services =
+                _context.Services
+                .ToList();
+
+            ViewBag.ServiceRequests =
+(
+    from r in _context.ServiceRequests
+
+    join s in _context.Services
+        on r.ServiceId equals s.Id
+
+    where r.TripGroupId == id
+
+    select new
+    {
+        r.Id,
+        r.Status,
+        ServiceName = s.Name
+    }
+
+).ToList();
+
+            ViewBag.ServiceVotes =
+                _context.ServiceRequestVotes
+                .ToList();
+
+            // Dịch vụ mà user hiện tại đã chọn KHÔNG dùng
+            ViewBag.MyOptOuts =
+                _context.ServiceOptOuts
+                .Where(x =>
+                    x.TripGroupId == id &&
+                    x.UserId == currentUserId)
+                .Select(x => x.ServiceId)
+                .ToList();
+
+            ViewBag.CurrentUserId = currentUserId;
+
+            return View(trip);
+        }
+
+        public IActionResult Members(int id)
+        {
+            var members =
+            (
+                from tm in _context.TripMembers
+                join u in _context.Users
+                    on tm.UserId equals u.Id
+                where tm.TripGroupId == id
+                select new TripMemberViewModel
+                {
+                    UserId = u.Id,
+                    FullName = u.FullName,
+                    AvatarUrl = u.AvatarUrl,
+                    Bio = u.Bio
+                }
+            ).ToList();
+
+            ViewBag.TripId = id;
+
+            return View(members);
+        }
+
+        // ==========================================
+        // CẬP NHẬT ACTION JOIN (KIỂM TRA PENDING + GỬI THÔNG BÁO)
+        // ==========================================
+        [HttpPost]
+        public async Task<IActionResult> Join(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return RedirectToAction("Login", "Auth");
+
+            var exists =
+                _context.JoinRequests.Any(x =>
+                    x.TripGroupId == id &&
+                    x.UserId == user.Id &&
+                    x.Status == "Pending");
+
+            if (exists)
+            {
+                TempData["Message"] = "Bạn đã gửi yêu cầu tham gia rồi.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id });
+            }
+
+            // Đã thêm RequestDate = DateTime.Now
+            _context.JoinRequests.Add(
+                new JoinRequest
+                {
+                    TripGroupId = id,
+                    UserId = user.Id,
+                    Status = "Pending",
+                    RequestDate = DateTime.Now
+                });
+
+            var trip = _context.TripGroups
+                .FirstOrDefault(x => x.Id == id);
+
+            if (trip != null)
+            {
+                _context.Notifications.Add(
+                    new Notification
+                    {
+                        UserId = trip.LeaderId,
+                        Title = "Yêu cầu tham gia mới",
+                        Content = $"{user.Email} muốn tham gia nhóm {trip.Title}",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    });
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // ==========================================
+        // CẬP NHẬT ACTION APPROVEREQUEST
+        // ==========================================
+        [HttpPost]
+        public async Task<IActionResult> ApproveRequest(int tripId, string userId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var trip = _context.TripGroups
+                .FirstOrDefault(x => x.Id == tripId);
+
+            if (trip == null)
+                return NotFound();
+
+            if (trip.LeaderId != user!.Id)
+                return Unauthorized();
+
+            var request = _context.JoinRequests
+                .FirstOrDefault(x =>
+                    x.TripGroupId == tripId &&
+                    x.UserId == userId);
+
+            if (request == null)
+                return NotFound();
+
+            request.Status = "Approved";
+
+            bool exists = _context.TripMembers.Any(x =>
+                x.TripGroupId == tripId &&
+                x.UserId == userId);
+
+            if (!exists)
+            {
+                _context.TripMembers.Add(
+                    new TripMember
+                    {
+                        TripGroupId = tripId,
+                        UserId = userId,
+                        JoinedAt = DateTime.Now
+                    });
+            }
+
+            // Thêm thông báo khi duyệt thành công
+            _context.Notifications.Add(
+                new Notification
+                {
+                    UserId = userId,
+                    Title = "Yêu cầu được chấp nhận",
+                    Content = "Bạn đã được chấp nhận vào nhóm.",
+                    CreatedAt = DateTime.Now
+                });
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id = tripId });
+        }
+
+        // ==========================================
+        // CẬP NHẬT ACTION REJECTREQUEST
+        // ==========================================
+        [HttpPost]
+        public async Task<IActionResult> RejectRequest(int tripId, string userId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var trip = _context.TripGroups
+                .FirstOrDefault(x => x.Id == tripId);
+
+            if (trip == null)
+                return NotFound();
+
+            if (trip.LeaderId != user!.Id)
+                return Unauthorized();
+
+            var request = _context.JoinRequests
+                .FirstOrDefault(x =>
+                    x.TripGroupId == tripId &&
+                    x.UserId == userId);
+
+            if (request == null)
+                return NotFound();
+
+            request.Status = "Rejected";
+
+            // Thêm thông báo khi từ chối yêu cầu
+            _context.Notifications.Add(
+                new Notification
+                {
+                    UserId = userId,
+                    Title = "Yêu cầu bị từ chối",
+                    Content = "Yêu cầu tham gia của bạn đã bị từ chối.",
+                    CreatedAt = DateTime.Now
+                });
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id = tripId });
+        }
+
+        // ==========================================
+        // THÊM ĐIỀU KIỆN CHẶN TRƯỞNG NHÓM RỜI NHÓM
+        // ==========================================
+        public async Task<IActionResult> Leave(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var trip = _context.TripGroups
+                .FirstOrDefault(x => x.Id == id);
+
+            if (trip != null && trip.LeaderId == user!.Id)
+            {
+                TempData["Error"] = "Trưởng nhóm không thể rời nhóm.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var member = _context.TripMembers
+                .FirstOrDefault(x =>
+                    x.TripGroupId == id &&
+                    x.UserId == user!.Id);
+
+            if (member != null)
+            {
+                _context.TripMembers.Remove(member);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(MyTrips));
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var trip = await _context.TripGroups.FindAsync(id);
+
+            if (trip == null)
+                return NotFound();
+
+            var members = _context.TripMembers
+                .Where(x => x.TripGroupId == id);
+
+            _context.TripMembers.RemoveRange(members);
+
+            var requests = _context.JoinRequests
+                .Where(x => x.TripGroupId == id);
+
+            _context.JoinRequests.RemoveRange(requests);
+
+            var expenses = _context.Expenses
+                .Where(x => x.TripGroupId == id);
+
+            _context.Expenses.RemoveRange(expenses);
+
+            _context.TripGroups.Remove(trip);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(MyTrips));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendMessage(
+    int tripId,
+    string message)
+        {
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Json(new { success = false });
+
+            if (string.IsNullOrWhiteSpace(message))
+                return Json(new { success = false });
+
+            var msg = new GroupMessage
+            {
+                TripGroupId = tripId,
+                UserId = user.Id,
+                Message = message.Trim(),
+                SentAt = DateTime.Now
+            };
+
+            _context.GroupMessages.Add(msg);
+
+            await _context.SaveChangesAsync();
+
+            string name =
+                string.IsNullOrEmpty(user.FullName)
+                ? user.Email
+                : user.FullName;
+
+            return Json(new
+            {
+                success = true,
+                id = msg.Id,
+                userId = user.Id,
+                userName = name,
+                message = msg.Message,
+                time = msg.SentAt.ToString("HH:mm dd/MM")
+            });
+        }
+
+        // Lấy tin nhắn mới (dùng cho polling, không reload trang)
+        [HttpGet]
+        public IActionResult GetMessages(int tripId, int afterId = 0)
+        {
+            var messages =
+            (
+                from m in _context.GroupMessages
+                join u in _context.Users
+                    on m.UserId equals u.Id
+                where m.TripGroupId == tripId
+                    && m.Id > afterId
+                orderby m.Id
+                select new
+                {
+                    m.Id,
+                    UserId = m.UserId,
+                    UserName =
+                        string.IsNullOrEmpty(u.FullName)
+                        ? u.Email
+                        : u.FullName,
+                    Message = m.Message,
+                    SentAt = m.SentAt
+                }
+            ).ToList();
+
+            var result = messages.Select(x => new
+            {
+                id = x.Id,
+                userId = x.UserId,
+                userName = x.UserName,
+                message = x.Message,
+                time = x.SentAt.ToString("HH:mm dd/MM")
+            });
+
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyService(
+            int tripId,
+            int serviceId)
+        {
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            bool exists =
+                _context.TripServices.Any(x =>
+                    x.TripGroupId == tripId &&
+                    x.ServiceId == serviceId);
+
+            if (!exists)
+            {
+                _context.TripServices.Add(
+                    new TripService
+                    {
+                        TripGroupId = tripId,
+                        ServiceId = serviceId,
+                        AppliedByUserId = user!.Id
+                    });
+
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(
+                "Details",
+                new { id = tripId });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveService(int id)
+        {
+            var tripService =
+                _context.TripServices
+                .FirstOrDefault(x => x.Id == id);
+
+            if (tripService == null)
+                return NotFound();
+
+            int tripId = tripService.TripGroupId;
+
+            _context.TripServices.Remove(tripService);
+
+            _context.SaveChanges();
+
+            return RedirectToAction(
+                "Details",
+                new { id = tripId });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult>
+        ApproveService(int requestId)
+        {
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            var request =
+                _context.ServiceRequests
+                .FirstOrDefault(x =>
+                    x.Id == requestId);
+
+            if (request == null)
+                return RedirectToAction("MyTrips");
+
+            bool voted =
+                _context.ServiceRequestVotes
+                .Any(x =>
+                    x.ServiceRequestId == requestId
+                    && x.UserId == user!.Id);
+
+            if (!voted)
+            {
+                _context.ServiceRequestVotes.Add(
+                    new ServiceRequestVote
+                    {
+                        ServiceRequestId = requestId,
+                        UserId = user.Id,
+                        IsApproved = true
+                    });
+
+                await _context.SaveChangesAsync();
+            }
+
+            var memberCount =
+    _context.TripMembers
+    .Count(x =>
+        x.TripGroupId ==
+        request.TripGroupId);
+
+            var yesVotes =
+                _context.ServiceRequestVotes
+                .Count(x =>
+                    x.ServiceRequestId == requestId
+                    &&
+                    x.IsApproved);
+
+            if (yesVotes >= memberCount
+                &&
+                request.Status == "Pending")
+            {
+                var service =
+                    _context.Services
+                    .FirstOrDefault(x =>
+                        x.Id == request.ServiceId);
+
+                if (service != null)
+                {
+                    bool serviceExists =
+                        _context.TripServices.Any(x =>
+                            x.TripGroupId == request.TripGroupId &&
+                            x.ServiceId == service.Id);
+
+                    if (!serviceExists)
+                    {
+                        _context.TripServices.Add(
+                            new TripService
+                            {
+                                TripGroupId = request.TripGroupId,
+                                ServiceId = service.Id,
+                                AppliedByUserId = request.CreatedByUserId,
+                                AppliedAt = DateTime.Now
+                            });
+                    }
+                    _context.Bookings.Add(
+                    new Booking
+                    {
+                        TripGroupId = request.TripGroupId,
+
+                        ServiceId = service.Id,
+
+                        UserId = request.CreatedByUserId,
+
+                        BookingDate = DateTime.Now,
+
+                        Status = "Pending"
+                    });
+                    var expense = new Expense
+                    {
+                        TripGroupId = request.TripGroupId,
+
+                        Title = service.Name,
+
+                        Amount = service.Price,
+
+                        PaidByUserId = request.CreatedByUserId,
+
+                        IsApproved = true,
+
+                        ApprovedAt = DateTime.Now,
+
+                        CreatedAt = DateTime.Now
+                    };
+
+                    _context.Expenses.Add(expense);
+                                    
+
+                    
+                    await _context.SaveChangesAsync();
+
+                    var members =
+                        _context.TripMembers
+                        .Where(x =>
+                            x.TripGroupId ==
+                            request.TripGroupId)
+                        .ToList();
+
+                    // Loại bỏ thành viên KHÔNG dùng dịch vụ này
+                    var optedOut =
+                        _context.ServiceOptOuts
+                        .Where(x =>
+                            x.TripGroupId == request.TripGroupId &&
+                            x.ServiceId == service.Id)
+                        .Select(x => x.UserId)
+                        .ToList();
+
+                    var splitMembers =
+                        members
+                        .Where(m => !optedOut.Contains(m.UserId))
+                        .ToList();
+
+                    decimal splitAmount =
+                        splitMembers.Count > 0
+                        ? service.Price / splitMembers.Count
+                        : 0;
+
+                    foreach (var member in splitMembers)
+                    {
+                        _context.ExpenseSplits.Add(
+                            new ExpenseSplit
+                            {
+                                ExpenseId = expense.Id,
+
+                                UserId = member.UserId,
+
+                                Amount = splitAmount,
+
+                                IsPaid = false
+                            });
+                    }
+
+                    foreach (var member in members)
+                    {
+                        if (member.UserId != request.CreatedByUserId)
+                        {
+                            _context.ExpenseApprovals.Add(
+                                new ExpenseApproval
+                                {
+                                    ExpenseId = expense.Id,
+
+                                    UserId = member.UserId,
+
+                                    IsApproved = true,
+
+                                    ApprovedAt = DateTime.Now
+                                });
+                        }
+                    }
+
+                    var creator =
+                        _context.Users
+                        .FirstOrDefault(x =>
+                            x.Id == request.CreatedByUserId);
+
+                    string creatorName =
+                        creator == null
+                            ? "Thành viên"
+                            : string.IsNullOrEmpty(creator.FullName)
+                                ? creator.Email
+                                : creator.FullName;
+
+                    foreach (var member in members)
+                    {
+                        if (member.UserId != request.CreatedByUserId)
+                        {
+                            _context.Notifications.Add(
+                                new Notification
+                                {
+                                    UserId = member.UserId,
+
+                                    Title = "Chi phí mới",
+
+                                    Content =
+                                        $"{creatorName} vừa thêm khoản chi '{service.Name}'",
+
+                                    IsRead = false,
+
+                                    CreatedAt = DateTime.Now
+                                });
+                        }
+                    }
+                    request.Status = "Approved";
+
+                    foreach (var member in members)
+                    {
+                        if (member.UserId != request.CreatedByUserId)
+                        {
+                            _context.Notifications.Add(
+                                new Notification
+                                {
+                                    UserId = member.UserId,
+                                    Title = "Chi phí mới",
+                                    Content =
+                                        $"{creatorName} vừa thêm khoản chi '{service.Name}'",
+                                    IsRead = false,
+                                    CreatedAt = DateTime.Now
+                                });
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return RedirectToAction(
+                "Details",
+                new { id = request.TripGroupId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult>
+        RejectService(int requestId)
+        {
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            var request =
+                _context.ServiceRequests
+                .FirstOrDefault(x =>
+                    x.Id == requestId);
+
+            if (request == null)
+                return RedirectToAction("MyTrips");
+
+            bool voted =
+                _context.ServiceRequestVotes
+                .Any(x =>
+                    x.ServiceRequestId == requestId
+                    && x.UserId == user!.Id);
+
+            if (!voted)
+            {
+                _context.ServiceRequestVotes.Add(
+                    new ServiceRequestVote
+                    {
+                        ServiceRequestId = requestId,
+                        UserId = user.Id,
+                        IsApproved = false
+                    });
+
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(
+                "Details",
+                new { id = request.TripGroupId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmTripService(int tripServiceId)
+        {
+            var tripService =
+                _context.TripServices
+                .FirstOrDefault(x => x.Id == tripServiceId);
+
+            if (tripService == null)
+                return NotFound();
+
+            var service =
+                _context.Services
+                .FirstOrDefault(x =>
+                    x.Id == tripService.ServiceId);
+
+            if (service == null)
+                return NotFound();
+
+            bool exists =
+                _context.Expenses.Any(x =>
+                    x.TripGroupId == tripService.TripGroupId
+                    &&
+                    x.Title == service.Name);
+
+            if (!exists)
+            {
+                var leader =
+                    await _userManager.GetUserAsync(User);
+
+                var expense = new Expense
+                {
+                    TripGroupId = tripService.TripGroupId,
+                    PaidByUserId = leader!.Id,
+                    Title = service.Name,
+                    Amount = service.Price,
+                    CreatedAt = DateTime.Now,
+                    IsApproved = false
+                };
+
+                _context.Expenses.Add(expense);
+
+                await _context.SaveChangesAsync();
+
+                var members =
+                    _context.TripMembers
+                    .Where(x =>
+                        x.TripGroupId ==
+                        tripService.TripGroupId)
+                    .ToList();
+
+                // Loại bỏ thành viên KHÔNG dùng dịch vụ này
+                var optedOut =
+                    _context.ServiceOptOuts
+                    .Where(x =>
+                        x.TripGroupId == tripService.TripGroupId &&
+                        x.ServiceId == service.Id)
+                    .Select(x => x.UserId)
+                    .ToList();
+
+                var splitMembers =
+                    members
+                    .Where(m => !optedOut.Contains(m.UserId))
+                    .ToList();
+
+                decimal split =
+                    splitMembers.Count > 0
+                    ? service.Price / splitMembers.Count
+                    : 0;
+
+                foreach (var member in splitMembers)
+                {
+                    _context.ExpenseSplits.Add(
+                        new ExpenseSplit
+                        {
+                            ExpenseId = expense.Id,
+                            UserId = member.UserId,
+                            Amount = split,
+                            IsPaid = false
+                        });
+                }
+
+                foreach (var member in members)
+                {
+                    if (member.UserId != leader.Id)
+                    {
+                        _context.ExpenseApprovals.Add(
+                            new ExpenseApproval
+                            {
+                                ExpenseId = expense.Id,
+                                UserId = member.UserId,
+                                IsApproved = false
+                            });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(
+                "Details",
+                new
+                {
+                    id = tripService.TripGroupId
+                });
+        }
+
+        // ==========================================
+        // TASK 2: THÀNH VIÊN KHÔNG SỬ DỤNG DỊCH VỤ
+        // ==========================================
+        [HttpPost]
+        public async Task<IActionResult> ToggleServiceOptOut(
+            int tripId,
+            int serviceId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return RedirectToAction("Login", "Auth");
+
+            bool isMember =
+                _context.TripMembers.Any(x =>
+                    x.TripGroupId == tripId &&
+                    x.UserId == user.Id);
+
+            if (!isMember)
+                return Unauthorized();
+
+            var service =
+                _context.Services
+                .FirstOrDefault(x => x.Id == serviceId);
+
+            // Tìm khoản chi tương ứng (theo tên dịch vụ trong nhóm)
+            Expense? expense =
+                service == null
+                ? null
+                : _context.Expenses
+                    .FirstOrDefault(x =>
+                        x.TripGroupId == tripId &&
+                        x.Title == service.Name);
+
+            // Đã có người thanh toán -> không cho đổi
+            if (expense != null &&
+                _context.ExpenseSplits.Any(x =>
+                    x.ExpenseId == expense.Id && x.IsPaid))
+            {
+                TempData["Error"] =
+                    "Dịch vụ này đã có người thanh toán, không thể thay đổi.";
+
+                return RedirectToAction(
+                    "Details", new { id = tripId });
+            }
+
+            var existing =
+                _context.ServiceOptOuts
+                .FirstOrDefault(x =>
+                    x.TripGroupId == tripId &&
+                    x.ServiceId == serviceId &&
+                    x.UserId == user.Id);
+
+            if (existing == null)
+            {
+                _context.ServiceOptOuts.Add(
+                    new ServiceOptOut
+                    {
+                        TripGroupId = tripId,
+                        ServiceId = serviceId,
+                        UserId = user.Id
+                    });
+            }
+            else
+            {
+                _context.ServiceOptOuts.Remove(existing);
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Tính lại tiền chia nếu khoản chi đã tồn tại
+            if (expense != null)
+                await RecalculateExpenseSplits(
+                    expense, tripId, serviceId);
+
+            return RedirectToAction(
+                "Details", new { id = tripId });
+        }
+
+        // Chia lại tiền cho 1 khoản chi, bỏ qua người không dùng dịch vụ
+        private async Task RecalculateExpenseSplits(
+            Expense expense, int tripId, int serviceId)
+        {
+            var optedOut =
+                _context.ServiceOptOuts
+                .Where(x =>
+                    x.TripGroupId == tripId &&
+                    x.ServiceId == serviceId)
+                .Select(x => x.UserId)
+                .ToList();
+
+            var memberIds =
+                _context.TripMembers
+                .Where(x => x.TripGroupId == tripId)
+                .Select(x => x.UserId)
+                .ToList();
+
+            var activeMembers =
+                memberIds
+                .Where(uid => !optedOut.Contains(uid))
+                .ToList();
+
+            // Xoá split cũ
+            var oldSplits =
+                _context.ExpenseSplits
+                .Where(x => x.ExpenseId == expense.Id);
+
+            _context.ExpenseSplits.RemoveRange(oldSplits);
+
+            await _context.SaveChangesAsync();
+
+            if (activeMembers.Count == 0)
+                return;
+
+            decimal split =
+                expense.Amount / activeMembers.Count;
+
+            foreach (var uid in activeMembers)
+            {
+                _context.ExpenseSplits.Add(
+                    new ExpenseSplit
+                    {
+                        ExpenseId = expense.Id,
+                        UserId = uid,
+                        Amount = split,
+                        IsPaid = false
+                    });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        // ==========================================
+        // TASK 4: HOÀN THÀNH CHUYẾN ĐI
+        // (chặn nếu còn khoản chưa thanh toán)
+        // ==========================================
+        [HttpPost]
+        public async Task<IActionResult> CompleteTrip(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var trip =
+                _context.TripGroups
+                .FirstOrDefault(x => x.Id == id);
+
+            if (trip == null)
+                return NotFound();
+
+            if (trip.LeaderId != user!.Id)
+                return Unauthorized();
+
+            // Đếm các khoản đã duyệt mà người nợ chưa thanh toán
+            int unpaid =
+            (
+                from split in _context.ExpenseSplits
+                join expense in _context.Expenses
+                    on split.ExpenseId equals expense.Id
+                where expense.TripGroupId == id
+                    && expense.IsApproved
+                    && split.UserId != expense.PaidByUserId
+                    && !split.IsPaid
+                select split.Id
+            ).Count();
+
+            if (unpaid > 0)
+            {
+                TempData["Error"] =
+                    $"Còn {unpaid} khoản chưa thanh toán. Không thể hoàn thành chuyến đi.";
+
+                return RedirectToAction(
+                    "Details", new { id });
+            }
+
+            trip.IsCompleted = true;
+            trip.CompletedAt = DateTime.Now;
+
+            var memberIds =
+                _context.TripMembers
+                .Where(x => x.TripGroupId == id)
+                .Select(x => x.UserId)
+                .ToList();
+
+            foreach (var mid in memberIds)
+            {
+                _context.Notifications.Add(
+                    new Notification
+                    {
+                        UserId = mid,
+                        Title = "Chuyến đi hoàn thành",
+                        Content =
+                            $"Chuyến đi '{trip.Title}' đã được đánh dấu hoàn thành.",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    });
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Đã hoàn thành chuyến đi!";
+
+            return RedirectToAction("Details", new { id });
+        }
+    }
+}
