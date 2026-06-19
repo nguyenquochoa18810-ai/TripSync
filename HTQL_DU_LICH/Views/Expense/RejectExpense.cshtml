@@ -1,0 +1,64 @@
+﻿@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Yêu cầu miễn chia tiền";
+}
+
+<div class="container">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-danger text-white">
+
+            <h4>
+                ❌ Không tham gia khoản chi
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="RejectExpense"
+                  method="post">
+
+                <input type="hidden"
+                       name="expenseId"
+                       value="@ViewBag.ExpenseId" />
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Lý do không tham gia
+                    </label>
+
+                    <textarea name="reason"
+                              class="form-control"
+                              rows="4"
+                              required>
+                    </textarea>
+
+                </div>
+
+                <button class="btn btn-danger">
+                    Gửi yêu cầu
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+                    Hủy
+                </a>
+
+            </form>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["Error"]
+                </div>
+            }
+
+
+        </div>
+
+    </div>
+
+</div>

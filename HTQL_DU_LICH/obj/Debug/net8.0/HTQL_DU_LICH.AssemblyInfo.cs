@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HTQL_DU_LICH")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d209bd3b43c235c062b901de5aa2ecc62493d5a2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d20cf7071537aceae0ee249562aaf948c7daa7d6")]
 [assembly: System.Reflection.AssemblyProductAttribute("HTQL_DU_LICH")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HTQL_DU_LICH")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

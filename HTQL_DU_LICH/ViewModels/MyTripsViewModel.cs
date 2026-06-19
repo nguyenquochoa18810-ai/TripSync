@@ -12,5 +12,9 @@ namespace HTQL_DU_LICH.ViewModels
 
         public List<TripGroup> PendingTrips { get; set; }
             = new();
+
+        public List<TripGroup> CompletedTrips
+        { get; set; }
+            = new();
     }
 }

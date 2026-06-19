@@ -203,6 +203,37 @@ namespace HTQL_DU_LICH.Migrations
                     b.ToTable("ExpenseApprovals");
                 });
 
+            modelBuilder.Entity("HTQL_DU_LICH.Models.ExpenseExclusionRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExpenseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExpenseExclusionRequests");
+                });
+
             modelBuilder.Entity("HTQL_DU_LICH.Models.ExpenseSplit", b =>
                 {
                     b.Property<int>("Id")
@@ -414,6 +445,9 @@ namespace HTQL_DU_LICH.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -464,29 +498,6 @@ namespace HTQL_DU_LICH.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ServiceRequests");
-                });
-
-            modelBuilder.Entity("HTQL_DU_LICH.Models.ServiceRequestVote", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ServiceRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceRequestVotes");
                 });
 
             modelBuilder.Entity("HTQL_DU_LICH.Models.ServiceVote", b =>
@@ -543,6 +554,10 @@ namespace HTQL_DU_LICH.Migrations
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()

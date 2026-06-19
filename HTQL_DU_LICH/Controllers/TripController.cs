@@ -65,6 +65,86 @@ namespace HTQL_DU_LICH.Controllers
             _context.TripGroups.Add(trip);
             await _context.SaveChangesAsync();
 
+
+            // Thêm trưởng nhóm vào thành viên trước
+            _context.TripMembers.Add(
+    new TripMember
+    {
+        TripGroupId = trip.Id,
+        UserId = user.Id,
+        JoinedAt = DateTime.Now
+    });
+
+
+
+            await _context.SaveChangesAsync();
+
+
+
+            // Tạo ngân sách chuyến đi
+            var budgetExpense = new Expense
+            {
+                TripGroupId = trip.Id,
+                Title = "Ngân sách chuyến đi",
+                Amount = model.Budget,
+                PaidByUserId = user.Id,
+                IsApproved = true,
+                ApprovedAt = DateTime.Now,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Expenses.Add(budgetExpense);
+
+            await _context.SaveChangesAsync();
+
+
+            // Tạo công nợ cho các thành viên
+            var members =
+    _context.TripMembers
+    .Where(x => x.TripGroupId == trip.Id)
+    .ToList();
+
+            int debtorCount = members.Count - 1;
+
+            decimal splitAmount =
+                debtorCount > 0
+                ? model.Budget / debtorCount
+                : 0;
+
+            foreach (var member in members)
+            {
+                bool isPayer =
+                    member.UserId == user.Id;
+
+                _context.ExpenseSplits.Add(
+                    new ExpenseSplit
+                    {
+                        ExpenseId = budgetExpense.Id,
+                        UserId = member.UserId,
+
+                        Amount = isPayer
+                            ? 0
+                            : splitAmount,
+
+                        IsPaid = isPayer
+                    });
+
+                if (!isPayer)
+                {
+                    _context.ExpenseApprovals.Add(
+                        new ExpenseApproval
+                        {
+                            ExpenseId = budgetExpense.Id,
+                            UserId = member.UserId,
+                            IsApproved = true,
+                            ApprovedAt = DateTime.Now
+                        });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+
             // ==========================================
             // ĐOẠN CODE LƯU SỞ THÍCH ĐƯỢC THÊM VÀO ĐÂY
             // ==========================================
@@ -83,12 +163,7 @@ namespace HTQL_DU_LICH.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            _context.TripMembers.Add(new TripMember
-            {
-                TripGroupId = trip.Id,
-                UserId = user.Id
-            });
-            await _context.SaveChangesAsync();
+            
             return RedirectToAction("MyTrips");
         }
 
@@ -103,21 +178,37 @@ namespace HTQL_DU_LICH.Controllers
                 )?.Value;
 
             var model = new MyTripsViewModel();
+            model.CompletedTrips =
+                _context.TripGroups
+                .Where(x =>
+                    x.Status == "Completed"
+                &&
+                (
+                    x.LeaderId == userId
+                    ||
+                    _context.TripMembers.Any(m =>
+                        m.TripGroupId == x.Id &&
+                        m.UserId == userId)
+                ))
+            .ToList();
 
             model.CreatedTrips =
                 _context.TripGroups
-                .Where(x => x.LeaderId == userId)
+                .Where(x =>
+                    x.LeaderId == userId
+                    && x.Status != "Completed")
                 .ToList();
 
             model.JoinedTrips =
-            (
-                from tm in _context.TripMembers
-                join t in _context.TripGroups
-                    on tm.TripGroupId equals t.Id
-                where tm.UserId == userId
-                   && t.LeaderId != userId
-                select t
-            ).ToList();
+ (
+     from tm in _context.TripMembers
+     join t in _context.TripGroups
+         on tm.TripGroupId equals t.Id
+     where tm.UserId == userId
+        && t.LeaderId != userId
+        && t.Status != "Completed"
+     select t
+ ).ToList();
 
             model.PendingTrips =
             (
@@ -246,27 +337,30 @@ namespace HTQL_DU_LICH.Controllers
                 _context.Services
                 .ToList();
 
-            ViewBag.ServiceRequests =
+
+
+            ViewBag.UnpaidMembers =
 (
-    from r in _context.ServiceRequests
+    from split in _context.ExpenseSplits
 
-    join s in _context.Services
-        on r.ServiceId equals s.Id
+    join expense in _context.Expenses
+        on split.ExpenseId equals expense.Id
 
-    where r.TripGroupId == id
+    join member in _context.Users
+        on split.UserId equals member.Id
+
+    where expense.TripGroupId == id
+    && expense.IsApproved
+    && split.Amount > 0
+    && !split.IsPaid
+    && split.UserId != expense.PaidByUserId
 
     select new
     {
-        r.Id,
-        r.Status,
-        ServiceName = s.Name
+        Email = member.Email,
+        Amount = split.Amount
     }
-
 ).ToList();
-
-            ViewBag.ServiceVotes =
-                _context.ServiceRequestVotes
-                .ToList();
 
             return View(trip);
         }
@@ -356,9 +450,14 @@ namespace HTQL_DU_LICH.Controllers
         [HttpPost]
         public async Task<IActionResult> ApproveRequest(int tripId, string userId)
         {
-            var user = await _userManager.GetUserAsync(User);
 
-            var trip = _context.TripGroups
+            
+
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            var trip =
+                _context.TripGroups
                 .FirstOrDefault(x => x.Id == tripId);
 
             if (trip == null)
@@ -367,7 +466,8 @@ namespace HTQL_DU_LICH.Controllers
             if (trip.LeaderId != user!.Id)
                 return Unauthorized();
 
-            var request = _context.JoinRequests
+            var request =
+                _context.JoinRequests
                 .FirstOrDefault(x =>
                     x.TripGroupId == tripId &&
                     x.UserId == userId);
@@ -377,22 +477,97 @@ namespace HTQL_DU_LICH.Controllers
 
             request.Status = "Approved";
 
-            bool exists = _context.TripMembers.Any(x =>
-                x.TripGroupId == tripId &&
-                x.UserId == userId);
+            bool exists =
+    _context.TripMembers.Any(x =>
+        x.TripGroupId == tripId &&
+        x.UserId == userId);
 
             if (!exists)
             {
                 _context.TripMembers.Add(
-                    new TripMember
+
+        new TripMember
+
+        {
+
+            TripGroupId = tripId,
+
+            UserId = userId,
+
+            JoinedAt = DateTime.Now
+
+        });
+                await _context.SaveChangesAsync();
+
+
+                var budgetExpense =
+                    _context.Expenses
+                    .FirstOrDefault(x =>
+                        x.TripGroupId == tripId &&
+                        x.Title == "Ngân sách chuyến đi");
+
+                if (budgetExpense != null)
+                {
+                    budgetExpense.IsApproved = true;
+                    budgetExpense.ApprovedAt = DateTime.Now;
+
+                    var memberIds =
+                        _context.TripMembers
+                        .Where(x => x.TripGroupId == tripId)
+                        .Select(x => x.UserId)
+                        .ToList();
+
+                    int debtorCount =
+                        memberIds.Count - 1;
+
+                    decimal splitAmount =
+                        debtorCount > 0
+                        ? budgetExpense.Amount / debtorCount
+                        : 0;
+
+                    var oldSplits =
+                        _context.ExpenseSplits
+                        .Where(x => x.ExpenseId == budgetExpense.Id);
+
+                    _context.ExpenseSplits.RemoveRange(oldSplits);
+
+                    var oldApprovals =
+                        _context.ExpenseApprovals
+                        .Where(x => x.ExpenseId == budgetExpense.Id);
+
+                    _context.ExpenseApprovals.RemoveRange(oldApprovals);
+
+                    foreach (var memberId in memberIds)
                     {
-                        TripGroupId = tripId,
-                        UserId = userId,
-                        JoinedAt = DateTime.Now
-                    });
+                        bool isLeader =
+                            memberId == budgetExpense.PaidByUserId;
+
+                        _context.ExpenseSplits.Add(
+                            new ExpenseSplit
+                            {
+                                ExpenseId = budgetExpense.Id,
+                                UserId = memberId,
+                                Amount = isLeader
+                                    ? 0
+                                    : splitAmount,
+                                IsPaid = isLeader
+                            });
+
+                        if (!isLeader)
+                        {
+                            _context.ExpenseApprovals.Add(
+                                new ExpenseApproval
+                                {
+                                    ExpenseId = budgetExpense.Id,
+                                    UserId = memberId,
+                                    IsApproved = true,
+                                    ApprovedAt = DateTime.Now
+                                });
+                        }
+                    }
+                }
             }
 
-            // Thêm thông báo khi duyệt thành công
             _context.Notifications.Add(
                 new Notification
                 {
@@ -404,50 +579,106 @@ namespace HTQL_DU_LICH.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Details), new { id = tripId });
+            return RedirectToAction(
+                nameof(Details),
+                new { id = tripId });
         }
+        
 
-        // ==========================================
-        // CẬP NHẬT ACTION REJECTREQUEST
-        // ==========================================
-        [HttpPost]
-        public async Task<IActionResult> RejectRequest(int tripId, string userId)
-        {
-            var user = await _userManager.GetUserAsync(User);
+            // ==========================================
+            // CẬP NHẬT ACTION REJECTREQUEST
+            // ==========================================
+            [HttpPost]
+            public async Task<IActionResult> RejectRequest(int tripId, string userId)
+            {
+                var user = await _userManager.GetUserAsync(User);
 
-            var trip = _context.TripGroups
-                .FirstOrDefault(x => x.Id == tripId);
+                var trip = _context.TripGroups
+                    .FirstOrDefault(x => x.Id == tripId);
 
-            if (trip == null)
-                return NotFound();
+                if (trip == null)
+                    return NotFound();
 
-            if (trip.LeaderId != user!.Id)
-                return Unauthorized();
+                if (trip.LeaderId != user!.Id)
+                    return Unauthorized();
 
-            var request = _context.JoinRequests
-                .FirstOrDefault(x =>
-                    x.TripGroupId == tripId &&
-                    x.UserId == userId);
+                var request = _context.JoinRequests
+                    .FirstOrDefault(x =>
+                        x.TripGroupId == tripId &&
+                        x.UserId == userId);
 
-            if (request == null)
-                return NotFound();
+                if (request == null)
+                    return NotFound();
 
-            request.Status = "Rejected";
+                request.Status = "Rejected";
 
-            // Thêm thông báo khi từ chối yêu cầu
-            _context.Notifications.Add(
-                new Notification
+                // Thêm thông báo khi từ chối yêu cầu
+                _context.Notifications.Add(
+                    new Notification
+                    {
+                        UserId = userId,
+                        Title = "Yêu cầu bị từ chối",
+                        Content = "Yêu cầu tham gia của bạn đã bị từ chối.",
+                        CreatedAt = DateTime.Now
+                    });
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Details), new { id = tripId });
+            }
+
+            [HttpPost]
+            public IActionResult CompleteTrip(int tripId)
+            {
+                var trip =
+                    _context.TripGroups
+                    .FirstOrDefault(x => x.Id == tripId);
+
+                if (trip == null)
+                    return NotFound();
+
+            var unpaidMembers =
+(
+from split in _context.ExpenseSplits
+join expense in _context.Expenses
+    on split.ExpenseId equals expense.Id
+join user in _context.Users
+    on split.UserId equals user.Id
+
+where expense.TripGroupId == tripId
+    && expense.IsApproved
+    && !split.IsPaid
+    && split.Amount > 0
+    && split.UserId != expense.PaidByUserId
+
+select user.Email
+)
+.Distinct()
+.ToList();
+
+            if (unpaidMembers.Any())
                 {
-                    UserId = userId,
-                    Title = "Yêu cầu bị từ chối",
-                    Content = "Yêu cầu tham gia của bạn đã bị từ chối.",
-                    CreatedAt = DateTime.Now
-                });
+                    TempData["Error"] =
+                        "Không thể hoàn thành chuyến đi. Thành viên chưa thanh toán: "
+                        + string.Join(", ", unpaidMembers);
 
-            await _context.SaveChangesAsync();
+                    return RedirectToAction(
+                        "Details",
+                        new { id = tripId });
+                }
 
-            return RedirectToAction(nameof(Details), new { id = tripId });
-        }
+                trip.Status = "Completed";
+
+                _context.SaveChanges();
+
+                TempData["Success"] =
+                    "Chuyến đi đã được hoàn thành.";
+
+                return RedirectToAction(nameof(MyTrips));
+            }
+        
+
+        
 
         // ==========================================
         // THÊM ĐIỀU KIỆN CHẶN TRƯỞNG NHÓM RỜI NHÓM
@@ -514,6 +745,14 @@ namespace HTQL_DU_LICH.Controllers
     int tripId,
     string message)
         {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return Json(new
+                {
+                    success = false
+                });
+            }
+
             var user =
                 await _userManager.GetUserAsync(User);
 
@@ -527,36 +766,105 @@ namespace HTQL_DU_LICH.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(
-                "Details",
-                new { id = tripId });
+            return Json(new
+            {
+                success = true,
+                userName = user.Email,
+                message = message,
+                time = DateTime.Now
+                    .ToString("dd/MM/yyyy HH:mm:ss")
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> ApplyService(
-            int tripId,
-            int serviceId)
+    int tripId,
+    int serviceId)
         {
             var user =
                 await _userManager.GetUserAsync(User);
 
-            bool exists =
-                _context.TripServices.Any(x =>
-                    x.TripGroupId == tripId &&
-                    x.ServiceId == serviceId);
+            var service =
+                _context.Services
+                .FirstOrDefault(x => x.Id == serviceId);
 
-            if (!exists)
+            if (service == null)
+                return RedirectToAction(
+                    "Details",
+                    new { id = tripId });
+
+            
+
+            var tripService = new TripService
             {
-                _context.TripServices.Add(
-                    new TripService
-                    {
-                        TripGroupId = tripId,
-                        ServiceId = serviceId,
-                        AppliedByUserId = user!.Id
-                    });
+                TripGroupId = tripId,
+                ServiceId = serviceId,
+                AppliedByUserId = user!.Id,
+                AppliedAt = DateTime.Now
+            };
 
-                await _context.SaveChangesAsync();
+            _context.TripServices.Add(tripService);
+
+            var booking = new Booking
+            {
+                TripGroupId = tripId,
+                ServiceId = serviceId,
+                UserId = user.Id,
+                BookingDate = DateTime.Now,
+                Status = "Pending"
+            };
+
+            _context.Bookings.Add(booking);
+
+            var expense = new Expense
+            {
+                TripGroupId = tripId,
+                PaidByUserId = user.Id,
+                Title = service.Name,
+                Amount = service.Price,
+                IsApproved = true,
+                ApprovedAt = DateTime.Now,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Expenses.Add(expense);
+
+            await _context.SaveChangesAsync();
+
+            var members =
+    _context.TripMembers
+    .Where(x => x.TripGroupId == tripId)
+    .ToList();
+
+            int debtorCount =
+    members.Count - 1;
+
+            decimal splitAmount =
+                debtorCount > 0
+                ? service.Price / debtorCount
+                : 0;
+
+            foreach (var member in members)
+            {
+                _context.ExpenseSplits.Add(
+                    new ExpenseSplit
+                    {
+                        ExpenseId = expense.Id,
+
+                        UserId = member.UserId,
+
+                        Amount =
+                            member.UserId == user.Id
+                            ? 0
+                            : splitAmount,
+
+                        IsPaid =
+                            member.UserId == user.Id
+                    });
             }
+
+            await _context.SaveChangesAsync();
+
 
             return RedirectToAction(
                 "Details",
@@ -585,258 +893,11 @@ namespace HTQL_DU_LICH.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult>
-        ApproveService(int requestId)
-        {
-            var user =
-                await _userManager.GetUserAsync(User);
+        
+        
 
-            var request =
-                _context.ServiceRequests
-                .FirstOrDefault(x =>
-                    x.Id == requestId);
+        
 
-            if (request == null)
-                return RedirectToAction("MyTrips");
-
-            bool voted =
-                _context.ServiceRequestVotes
-                .Any(x =>
-                    x.ServiceRequestId == requestId
-                    && x.UserId == user!.Id);
-
-            if (!voted)
-            {
-                _context.ServiceRequestVotes.Add(
-                    new ServiceRequestVote
-                    {
-                        ServiceRequestId = requestId,
-                        UserId = user.Id,
-                        IsApproved = true
-                    });
-
-                await _context.SaveChangesAsync();
-            }
-
-            var memberCount =
-    _context.TripMembers
-    .Count(x =>
-        x.TripGroupId ==
-        request.TripGroupId);
-
-            var yesVotes =
-                _context.ServiceRequestVotes
-                .Count(x =>
-                    x.ServiceRequestId == requestId
-                    &&
-                    x.IsApproved);
-
-            if (yesVotes >= memberCount
-                &&
-                request.Status == "Pending")
-            {
-                var service =
-                    _context.Services
-                    .FirstOrDefault(x =>
-                        x.Id == request.ServiceId);
-
-                if (service != null)
-                {
-                    bool serviceExists =
-                        _context.TripServices.Any(x =>
-                            x.TripGroupId == request.TripGroupId &&
-                            x.ServiceId == service.Id);
-
-                    if (!serviceExists)
-                    {
-                        _context.TripServices.Add(
-                            new TripService
-                            {
-                                TripGroupId = request.TripGroupId,
-                                ServiceId = service.Id,
-                                AppliedByUserId = request.CreatedByUserId,
-                                AppliedAt = DateTime.Now
-                            });
-                    }
-                    _context.Bookings.Add(
-                    new Booking
-                    {
-                        TripGroupId = request.TripGroupId,
-
-                        ServiceId = service.Id,
-
-                        UserId = request.CreatedByUserId,
-
-                        BookingDate = DateTime.Now,
-
-                        Status = "Pending"
-                    });
-                    var expense = new Expense
-                    {
-                        TripGroupId = request.TripGroupId,
-
-                        Title = service.Name,
-
-                        Amount = service.Price,
-
-                        PaidByUserId = request.CreatedByUserId,
-
-                        IsApproved = true,
-
-                        ApprovedAt = DateTime.Now,
-
-                        CreatedAt = DateTime.Now
-                    };
-
-                    _context.Expenses.Add(expense);
-                                    
-
-                    
-                    await _context.SaveChangesAsync();
-
-                    var members =
-                        _context.TripMembers
-                        .Where(x =>
-                            x.TripGroupId ==
-                            request.TripGroupId)
-                        .ToList();
-
-                    decimal splitAmount =
-                        service.Price /
-                        members.Count;
-
-                    foreach (var member in members)
-                    {
-                        _context.ExpenseSplits.Add(
-                            new ExpenseSplit
-                            {
-                                ExpenseId = expense.Id,
-
-                                UserId = member.UserId,
-
-                                Amount = splitAmount,
-
-                                IsPaid = false
-                            });
-                    }
-
-                    foreach (var member in members)
-                    {
-                        if (member.UserId != request.CreatedByUserId)
-                        {
-                            _context.ExpenseApprovals.Add(
-                                new ExpenseApproval
-                                {
-                                    ExpenseId = expense.Id,
-
-                                    UserId = member.UserId,
-
-                                    IsApproved = true,
-
-                                    ApprovedAt = DateTime.Now
-                                });
-                        }
-                    }
-
-                    var creator =
-                        _context.Users
-                        .FirstOrDefault(x =>
-                            x.Id == request.CreatedByUserId);
-
-                    string creatorName =
-                        creator == null
-                            ? "Thành viên"
-                            : string.IsNullOrEmpty(creator.FullName)
-                                ? creator.Email
-                                : creator.FullName;
-
-                    foreach (var member in members)
-                    {
-                        if (member.UserId != request.CreatedByUserId)
-                        {
-                            _context.Notifications.Add(
-                                new Notification
-                                {
-                                    UserId = member.UserId,
-
-                                    Title = "Chi phí mới",
-
-                                    Content =
-                                        $"{creatorName} vừa thêm khoản chi '{service.Name}'",
-
-                                    IsRead = false,
-
-                                    CreatedAt = DateTime.Now
-                                });
-                        }
-                    }
-                    request.Status = "Approved";
-
-                    foreach (var member in members)
-                    {
-                        if (member.UserId != request.CreatedByUserId)
-                        {
-                            _context.Notifications.Add(
-                                new Notification
-                                {
-                                    UserId = member.UserId,
-                                    Title = "Chi phí mới",
-                                    Content =
-                                        $"{creatorName} vừa thêm khoản chi '{service.Name}'",
-                                    IsRead = false,
-                                    CreatedAt = DateTime.Now
-                                });
-                        }
-                    }
-
-                    await _context.SaveChangesAsync();
-                }
-            }
-
-            return RedirectToAction(
-                "Details",
-                new { id = request.TripGroupId });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult>
-        RejectService(int requestId)
-        {
-            var user =
-                await _userManager.GetUserAsync(User);
-
-            var request =
-                _context.ServiceRequests
-                .FirstOrDefault(x =>
-                    x.Id == requestId);
-
-            if (request == null)
-                return RedirectToAction("MyTrips");
-
-            bool voted =
-                _context.ServiceRequestVotes
-                .Any(x =>
-                    x.ServiceRequestId == requestId
-                    && x.UserId == user!.Id);
-
-            if (!voted)
-            {
-                _context.ServiceRequestVotes.Add(
-                    new ServiceRequestVote
-                    {
-                        ServiceRequestId = requestId,
-                        UserId = user.Id,
-                        IsApproved = false
-                    });
-
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(
-                "Details",
-                new { id = request.TripGroupId });
-        }
 
         [HttpPost]
         public async Task<IActionResult> ConfirmTripService(int tripServiceId)
@@ -856,69 +917,7 @@ namespace HTQL_DU_LICH.Controllers
             if (service == null)
                 return NotFound();
 
-            bool exists =
-                _context.Expenses.Any(x =>
-                    x.TripGroupId == tripService.TripGroupId
-                    &&
-                    x.Title == service.Name);
-
-            if (!exists)
-            {
-                var leader =
-                    await _userManager.GetUserAsync(User);
-
-                var expense = new Expense
-                {
-                    TripGroupId = tripService.TripGroupId,
-                    PaidByUserId = leader!.Id,
-                    Title = service.Name,
-                    Amount = service.Price,
-                    CreatedAt = DateTime.Now,
-                    IsApproved = false
-                };
-
-                _context.Expenses.Add(expense);
-
-                await _context.SaveChangesAsync();
-
-                var members =
-                    _context.TripMembers
-                    .Where(x =>
-                        x.TripGroupId ==
-                        tripService.TripGroupId)
-                    .ToList();
-
-                decimal split =
-                    service.Price / members.Count;
-
-                foreach (var member in members)
-                {
-                    _context.ExpenseSplits.Add(
-                        new ExpenseSplit
-                        {
-                            ExpenseId = expense.Id,
-                            UserId = member.UserId,
-                            Amount = split,
-                            IsPaid = false
-                        });
-                }
-
-                foreach (var member in members)
-                {
-                    if (member.UserId != leader.Id)
-                    {
-                        _context.ExpenseApprovals.Add(
-                            new ExpenseApproval
-                            {
-                                ExpenseId = expense.Id,
-                                UserId = member.UserId,
-                                IsApproved = false
-                            });
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-            }
+            
 
             return RedirectToAction(
                 "Details",
@@ -926,6 +925,19 @@ namespace HTQL_DU_LICH.Controllers
                 {
                     id = tripService.TripGroupId
                 });
+
+
+
+
         }
+
+        
+
+        
+        
+
+        
+
+
     }
 }

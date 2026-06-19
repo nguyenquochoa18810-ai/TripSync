@@ -1,161 +1,95 @@
-html {
-    font-size: 14px;
+/* =========================
+LOGIN / REGISTER PAGE
+========================= */
+
+.auth-page {
+    min-height: 100vh;
+    background: linear-gradient( 135deg, #eff6ff 0%, #f8fafc 100% );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
 }
 
-@media (min-width:768px) {
-    html {
+    .auth-page .card {
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,.08);
+    }
+
+    .auth-page .card-body {
+        padding: 50px;
+    }
+
+    .auth-page h1 {
+        font-size: 42px;
+        font-weight: 800;
+    }
+
+    .auth-page .form-control,
+    .auth-page .form-select {
+        height: 52px;
+        border-radius: 12px;
+    }
+
+        .auth-page .form-control:focus,
+        .auth-page .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 .2rem rgba(37,99,235,.15);
+        }
+
+    .auth-page .btn-primary,
+    .auth-page .btn-success {
+        height: 55px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .auth-page .btn-outline-primary,
+    .auth-page .btn-outline-success {
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .auth-page .text-muted {
         font-size: 16px;
     }
+
+/* NAVBAR */
+
+.navbar {
+    min-height: 70px;
 }
 
-html {
-    position: relative;
-    min-height: 100%;
+.navbar-brand {
+    font-size: 1.4rem;
+    font-weight: 700;
 }
 
-body {
-    margin-bottom: 60px;
-    background: #f5f7fb;
+.navbar-nav .nav-link {
+    padding-left: 14px;
+    padding-right: 14px;
+    font-weight: 500;
 }
 
-/* CARD */
-.card {
-    border-radius: 18px;
-    border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,.05);
-}
-
-.card-header {
-    border-radius: 18px 18px 0 0 !important;
-    font-weight: 600;
-}
-
-/* DASHBOARD */
-.dashboard-card {
-    border-radius: 18px;
-    transition: all .3s ease;
-}
-
-    .dashboard-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    .navbar-nav .nav-link:hover {
+        color: #fff !important;
     }
 
-/* SERVICE CARD */
-.service-card {
-    border-radius: 18px;
-    transition: all .3s ease;
-}
+/* MOBILE */
 
-    .service-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 25px rgba(0,0,0,.15);
+@media (max-width: 768px) {
+
+    .auth-page .card-body {
+        padding: 30px;
     }
 
-/* ICON */
-.icon-box {
-    width: 60px;
-    height: 60px;
-    border-radius: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-    color: white;
-}
-
-/* TABLE */
-.table {
-    vertical-align: middle;
-}
-
-    .table tbody tr:hover {
-        background: #f8fafc;
+    .auth-page h1 {
+        font-size: 30px;
     }
 
-/* BADGE */
-.badge {
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 14px;
-}
-
-/* BUTTON */
-.btn {
-    border-radius: 10px;
-    transition: .3s;
-}
-
-    .btn:hover {
-        transform: translateY(-2px);
+    .navbar-nav {
+        text-align: center;
     }
-
-.btn-sm {
-    border-radius: 8px;
-}
-
-/* FORM */
-.form-control,
-.form-select {
-    border-radius: 10px;
-    padding: 10px;
-}
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 .15rem rgba(37,99,235,.25);
-    }
-
-textarea {
-    resize: none;
-}
-
-/* ALERT */
-.alert {
-    border-radius: 12px;
-}
-
-/* COLORS */
-.text-primary {
-    color: #2563eb !important;
-}
-
-.text-success {
-    color: #16a34a !important;
-}
-
-.text-danger {
-    color: #dc2626 !important;
-}
-
-/* PROGRESS */
-.progress {
-    height: 25px;
-    border-radius: 15px;
-}
-
-.progress-bar {
-    font-weight: 600;
-}
-
-/* INTEREST */
-.interest-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 15px;
-    transition: .3s;
-    background: white;
-}
-
-    .interest-card:hover {
-        border-color: #2563eb;
-        background: #f8fafc;
-        transform: translateY(-2px);
-    }
-
-/* PROFILE */
-.profile-avatar {
-    object-fit: cover;
-    border: 5px solid white;
 }

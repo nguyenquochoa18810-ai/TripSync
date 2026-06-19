@@ -41,17 +41,29 @@ namespace HTQL_DU_LICH.Controllers
                     "VendorDashboard");
             }
 
-            var latestTrip = _context.TripGroups
-                .FirstOrDefault();
+            var myTripIds =
+                _context.TripMembers
+                    .Where(x => x.UserId == user.Id)
+                    .Select(x => x.TripGroupId)
+                    .ToList();
 
-            var latestBooking = _context.Bookings
-                .OrderByDescending(x => x.BookingDate)
-                .FirstOrDefault();
+            var latestTrip =
+                _context.TripGroups
+                    .Where(x => myTripIds.Contains(x.Id))
+                    .OrderByDescending(x => x.Id)
+                    .FirstOrDefault();
 
-            var latestService = latestBooking == null
-                ? null
-                : _context.Services
-                    .FirstOrDefault(x => x.Id == latestBooking.ServiceId);
+            var latestBooking =
+                _context.Bookings
+                    .Where(x => x.UserId == user.Id)
+                    .OrderByDescending(x => x.BookingDate)
+                    .FirstOrDefault();
+
+            var latestService =
+                latestBooking == null
+                    ? null
+                    : _context.Services
+                        .FirstOrDefault(x => x.Id == latestBooking.ServiceId);
 
             var tripIds =
     _context.TripMembers
