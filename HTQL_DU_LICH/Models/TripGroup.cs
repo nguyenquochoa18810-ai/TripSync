@@ -13,7 +13,9 @@
         public string? Description { get; set; }
         public string? CoverImage { get; set; }
 
-       
+        public string Status { get; set; } = "Active";
+
+
     }
 
 }

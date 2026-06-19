@@ -1,0 +1,136 @@
+﻿@model List<HTQL_DU_LICH.ViewModels.ExclusionRequestViewModel>
+
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <h2 class="fw-bold mb-4">
+        📋 Yêu cầu miễn chia tiền
+    </h2>
+
+    <table class="table table-bordered">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Nhóm</th>
+                <th>Người tạo</th>
+                <th>Người gửi</th>
+                <th>Khoản chi</th>
+                <th>Số tiền</th>
+                <th>Lý do</th>
+                <th>Trạng thái</th>
+                <th>Ngày gửi</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+
+                    <td>@item.TripName</td>
+
+                    <td>@item.ExpenseOwner</td>
+
+                    <td>@item.UserName</td>
+
+                    <td>@item.ExpenseTitle</td>
+
+                    <td class="text-danger fw-bold">
+                        @item.Amount.ToString("N0") VNĐ
+                    </td>
+
+                    <td>
+                        @item.Reason
+                    </td>
+
+                    <td>
+                        @if (item.Status == "Pending")
+                        {
+                            <span class="badge bg-warning text-dark">
+                                ⏳ Chờ duyệt
+                            </span>
+                        }
+                        else if (item.Status == "Approved")
+                        {
+                            <span class="badge bg-success">
+                                ✔ Đã duyệt
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">
+                                ✖ Đã từ chối
+                            </span>
+                        }
+                    </td>
+
+                    <td>
+                        @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                    </td>
+
+                    <td>
+
+                        @if (item.CanApprove && item.Status == "Pending")
+                        {
+                            <form asp-action="ApproveExclusionRequest"
+                                  method="post"
+                                  class="d-inline">
+
+                                <input type="hidden"
+                                       name="requestId"
+                                       value="@item.RequestId" />
+
+                                <button class="btn btn-success btn-sm">
+                                    ✔ Duyệt
+                                </button>
+
+                            </form>
+
+                            <form asp-action="RejectExclusionRequest"
+                                  method="post"
+                                  class="d-inline">
+
+                                <input type="hidden"
+                                       name="requestId"
+                                       value="@item.RequestId" />
+
+                                <button class="btn btn-danger btn-sm">
+                                    ✖ Từ chối
+                                </button>
+
+                            </form>
+                        }
+                        else if (item.Status == "Approved")
+                        {
+                            <span class="badge bg-success">
+                                ✔ Đã xác nhận
+                            </span>
+                        }
+                        else if (item.Status == "Rejected")
+                        {
+                            <span class="badge bg-danger">
+                                ✖ Đã từ chối
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">
+                                ⏳ Đang chờ
+                            </span>
+                        }
+
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

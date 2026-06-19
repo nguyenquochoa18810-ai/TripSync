@@ -93,46 +93,71 @@ namespace HTQL_DU_LICH.Controllers
             var user =
                 await _userManager.GetUserAsync(User);
 
-            var request =
-                new ServiceRequest
-                {
-                    TripGroupId = tripId,
-                    ServiceId = serviceId,
-                    CreatedByUserId = user!.Id
-                };
+            var service =
+                _context.Services
+                .FirstOrDefault(x => x.Id == serviceId);
 
-            _context.ServiceRequests.Add(request);
+            if (service == null)
+                return RedirectToAction(
+                    "Details",
+                    new { id = serviceId });
+
+
+
+            var tripService = new TripService
+            {
+                TripGroupId = tripId,
+                ServiceId = serviceId,
+                AppliedByUserId = user!.Id,
+                AppliedAt = DateTime.Now
+            };
+
+            
+            _context.TripServices.Add(tripService);
+
+            var booking = new Booking
+            {
+                TripGroupId = tripId,
+                ServiceId = serviceId,
+                UserId = user.Id,
+                BookingDate = DateTime.Now,
+                Status = "Pending"
+            };
+
+            _context.Bookings.Add(booking);
+
+            var expense = new Expense
+            {
+                TripGroupId = tripId,
+                Title = service.Name,
+                Amount = service.Price,
+                PaidByUserId = user.Id,
+                IsApproved = true,
+                ApprovedAt = DateTime.Now,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Expenses.Add(expense);
 
             await _context.SaveChangesAsync();
-
-            var service =
-    _context.Services
-    .FirstOrDefault(x => x.Id == serviceId);
 
             var members =
                 _context.TripMembers
                 .Where(x => x.TripGroupId == tripId)
                 .ToList();
 
+            decimal split =
+                service.Price / members.Count;
+
             foreach (var member in members)
             {
-                string content =
-                    member.UserId == user.Id
-                    ? $"Bạn đã đề xuất dịch vụ '{service?.Name}'"
-                    : $"{user.Email} đã đề xuất dịch vụ '{service?.Name}'";
-
-                _context.Notifications.Add(
-                    new Notification
+                _context.ExpenseSplits.Add(
+                    new ExpenseSplit
                     {
+                        ExpenseId = expense.Id,
                         UserId = member.UserId,
-
-                        Title = "Yêu cầu dịch vụ mới",
-
-                        Content = content,
-
-                        IsRead = false,
-
-                        CreatedAt = DateTime.Now
+                        Amount = split,
+                        IsPaid = false
                     });
             }
 

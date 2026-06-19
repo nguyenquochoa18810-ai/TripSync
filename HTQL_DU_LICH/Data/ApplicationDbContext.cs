@@ -43,17 +43,19 @@ namespace HTQL_DU_LICH.Data
 
         public DbSet<ExpenseApproval> ExpenseApprovals { get ; set; }
 
+        public DbSet<ExpenseExclusionRequest> ExpenseExclusionRequests { get; set; }
         public DbSet<GroupMessage> GroupMessages { get; set; }
 
         public DbSet<TripService> TripServices { get; set; }
 
         public DbSet<ServiceVote> ServiceVotes { get; set; }
 
+        
+
         public DbSet<ServiceRequest>
             ServiceRequests { get; set; }
 
-        public DbSet<ServiceRequestVote>
-            ServiceRequestVotes { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

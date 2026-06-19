@@ -178,6 +178,40 @@
 
         </div>
 
+        <div class="card mt-4">
+
+            <div class="card-header bg-success text-white">
+                📌 Nhóm đã hoàn thành
+            </div>
+
+            <div class="card-body">
+
+                @if (Model.CompletedTrips.Any())
+                {
+                    foreach (var trip in Model.CompletedTrips)
+                    {
+                        <div class="border rounded p-2 mb-2">
+
+                            <h6>@trip.Title</h6>
+
+                            <small>
+                                @trip.Destination
+                            </small>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>
+                        Chưa có chuyến đi hoàn thành.
+                    </p>
+                }
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>

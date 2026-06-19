@@ -130,6 +130,45 @@ namespace HTQL_DU_LICH.Controllers
                     UserId = request.UserId,
                     JoinedAt = DateTime.Now
                 });
+
+
+                await _context.SaveChangesAsync();
+
+                var budgetExpense = await _context.Expenses
+                    .FirstOrDefaultAsync(x =>
+                        x.TripGroupId == request.TripGroupId &&
+                        x.Title == "Ngân sách chuyến đi");
+
+                if (budgetExpense != null)
+                {
+                    var memberIds = await _context.TripMembers
+                        .Where(x => x.TripGroupId == request.TripGroupId)
+                        .Select(x => x.UserId)
+                        .ToListAsync();
+
+                    var oldSplits = _context.ExpenseSplits
+                        .Where(x => x.ExpenseId == budgetExpense.Id);
+
+                    _context.ExpenseSplits.RemoveRange(oldSplits);
+
+                    decimal splitAmount =
+                        budgetExpense.Amount / memberIds.Count;
+
+                    foreach (var memberId in memberIds)
+                    {
+                        bool isLeader =
+                            memberId == budgetExpense.PaidByUserId;
+
+                        _context.ExpenseSplits.Add(
+                            new ExpenseSplit
+                            {
+                                ExpenseId = budgetExpense.Id,
+                                UserId = memberId,
+                                Amount = isLeader ? 0 : splitAmount,
+                                IsPaid = isLeader
+                            });
+                    }
+                }
             }
 
             request.Status = "Approved";

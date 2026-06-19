@@ -20,5 +20,21 @@
         public int ApprovedCount { get; set; }
 
         public int TotalApprovals { get; set; }
+
+        public bool HasPendingRequest { get; set; }
+
+        public bool IsExpenseOwner { get; set; }
+
+        public int? RequestId { get; set; }
+
+        public string? RequestStatus { get; set; }
+
+        public string? RequestUserName { get; set; }
+
+        public string? RequestReason { get; set; }
+
+
+
+        public int PendingRequestCount { get; set; }
     }
 }

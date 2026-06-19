@@ -3,6 +3,7 @@ using HTQL_DU_LICH.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 
 namespace HTQL_DU_LICH.Controllers
 {
@@ -11,13 +12,16 @@ namespace HTQL_DU_LICH.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IWebHostEnvironment _environment;
 
         public VendorServiceController(
             ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IWebHostEnvironment environment)
         {
             _context = context;
             _userManager = userManager;
+            _environment = environment;
         }
 
         public async Task<IActionResult> Index()
@@ -49,7 +53,9 @@ namespace HTQL_DU_LICH.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Service model)
+        public async Task<IActionResult> Create(
+    Service model,
+    IFormFile? imageFile)
         {
             var user =
                 await _userManager.GetUserAsync(User);
@@ -62,11 +68,39 @@ namespace HTQL_DU_LICH.Controllers
             if (vendor == null)
                 return Content("Không tìm thấy Vendor");
 
-            model.VendorId = vendor.Id;
+            if (imageFile != null)
+            {
+                string fileName =
+                    Guid.NewGuid().ToString()
+                    + Path.GetExtension(imageFile.FileName);
 
-            model.Name ??= "";
-            model.ServiceType ??= "";
-            model.Description ??= "";
+                string folder =
+                    Path.Combine(
+                        _environment.WebRootPath,
+                        "uploads",
+                        "services");
+
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                string filePath =
+                    Path.Combine(folder, fileName);
+
+                using (var stream =
+                       new FileStream(
+                           filePath,
+                           FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                model.ImageUrl =
+                    "/uploads/services/" + fileName;
+            }
+
+            model.VendorId = vendor.Id;
 
             _context.Services.Add(model);
 
@@ -75,7 +109,7 @@ namespace HTQL_DU_LICH.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
+
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -104,8 +138,10 @@ namespace HTQL_DU_LICH.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Service model)
-        {
+        public async Task<IActionResult> Edit(
+            Service model,
+            IFormFile? imageFile)
+            {
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -145,6 +181,38 @@ namespace HTQL_DU_LICH.Controllers
 
             service.IsActive =
                 model.IsActive;
+
+            if (imageFile != null)
+            {
+                string fileName =
+                    Guid.NewGuid().ToString()
+                    + Path.GetExtension(imageFile.FileName);
+
+                string folder =
+                    Path.Combine(
+                        _environment.WebRootPath,
+                        "uploads",
+                        "services");
+
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                string filePath =
+                    Path.Combine(folder, fileName);
+
+                using (var stream =
+                       new FileStream(
+                           filePath,
+                           FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                service.ImageUrl =
+                    "/uploads/services/" + fileName;
+            }
 
             await _context.SaveChangesAsync();
 

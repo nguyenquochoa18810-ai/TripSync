@@ -1,6 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using HTQL_DU_LICH.Models
 @inject UserManager<ApplicationUser> UserManager
+@using HTQL_DU_LICH.Data
+@inject ApplicationDbContext Context
 
 <!DOCTYPE html>
 <html>
@@ -104,6 +106,8 @@
                    class="menu-item">
                     💰 Chi phí
                 </a>
+
+                
 
                 <a asp-controller="MyBooking" asp-action="Index"
                    class="menu-item">
